@@ -8,3 +8,9 @@ server/go.sum
 
 # other 
 bin/
+
+# VScode
+.vscode/
+
+# db
+*.db
