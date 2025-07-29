@@ -54,13 +54,16 @@ func (h *UpstreamRegistryHandler) CreateUpstreamRegistry(w http.ResponseWriter, 
 		common.HandleInternalError(w, http.StatusInternalServerError, "Error occured while persisting data")
 		return
 	}
-	
+
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(fmt.Sprintf(`{
-		"reg_id": %s,
-		"reg_name": %s
-	}`, regId, regName)))
+	err = json.NewEncoder(w).Encode(types.CreateUpstreamRegResMsg{
+		RegId:   regId,
+		RegName: regName,
+	})
+	if err != nil {
+		log.Logger().Error().Err(err).Msgf("Error occured when writing response after upstream registry is created: %s", regId)
+	}
 }
 
 func (h *UpstreamRegistryHandler) UpdateUpstreamRegistry(w http.ResponseWriter, r *http.Request) {

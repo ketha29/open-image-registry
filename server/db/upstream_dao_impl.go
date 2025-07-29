@@ -100,7 +100,7 @@ func (u *upstreamDaoImpl) CreateUpstreamRegistry(upstreamReg *types.UpstreamOCIR
 
 // DeleteUpstreamRegistry implements UpstreamDAO.
 func (u *upstreamDaoImpl) DeleteUpstreamRegistry(regId string) (err error) {
-	res, err := u.db.Exec(DeleteUpstreamOciRegistry)
+	res, err := u.db.Exec(DeleteUpstreamOciRegistry, regId)
 	if err != nil {
 		log.Logger().Error().Err(err).Msgf("Unable to delete UpstreamRegistry by id : %s", regId)
 		return db.ClassifyError(err, DeleteUpstreamOciRegistry)

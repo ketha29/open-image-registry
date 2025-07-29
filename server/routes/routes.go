@@ -20,13 +20,14 @@ func InitRouter(webappBuildPath string, database *sql.DB) *chi.Mux {
 	router := chi.NewRouter()
 
 	// Cors configuration
-	cors := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},
-		AllowedMethods: []string{"*"},
-		AllowedHeaders: []string{"*"},
+	corsMiddleware := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
 	})
 
-	router.Use(cors.Handler)
+	router.Use(corsMiddleware.Handler)
 	router.Use(httplog.RequestLogger(httplog.NewLogger("open-image-registry", httplog.Options{
 		LogLevel:         slog.LevelDebug,
 		Concise:          true,

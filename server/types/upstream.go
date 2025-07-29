@@ -66,16 +66,21 @@ type CreateUpstreamRegRequestMsg struct {
 
 type UpdateUpstreamRegRequestMsg = CreateUpstreamRegRequestMsg
 
+type CreateUpstreamRegResMsg struct {
+	RegId   string `json:"reg_id"`
+	RegName string `json:"reg_name"`
+}
+
 type UpstreamOCIRegEntityWithAdditionalInfo struct {
 	UpstreamOCIRegEntity
 	CachedImagesCount int `json:"cached_images_count"`
 }
 
 type ListUpstreamRegistriesResponseMsg struct {
-	Total       int
-	Page        int
-	Limit       int
-	Registeries []*UpstreamOCIRegEntityWithAdditionalInfo
+	Total       int                                       `json:"total"`
+	Page        int                                       `json:"page"`
+	Limit       int                                       `json:"limit"`
+	Registeries []*UpstreamOCIRegEntityWithAdditionalInfo `json:"registeries"`
 }
 
 type UpstreamOCIRegResMsg struct {
