@@ -1,22 +1,169 @@
+export type UpstreamOCIRegEntity = {
+  id?: string;
+  name: string;
+  url: string;
+  port: number;
+  status?: string;
+  upstream_url: string;
+  created_at: string; // ISO string format
+  updated_at: string;
+};
+
+export type UpstreamOCIRegAuthConfig = {
+  auth_type: string;
+  credentials_json?: Record<string, any>; // map[string]interface{}
+  token_endpoint: string;
+  certificate: string;
+  updated_at?: string;
+};
+
+export type UpstreamOCIRegAccessConfig = {
+  proxy_enabled: boolean;
+  proxy_url?: string;
+  connection_timeout: number;
+  read_timeout: number;
+  max_connections: number;
+  max_retries: number;
+  retry_delay: number;
+  updated_at: string;
+};
+
+export type UpstreamOCIRegStorageConfig = {
+  storage_limit: number; // in MBs
+  cleanup_policy: string;
+  cleanup_threshold: number;
+  updated_at: string;
+};
+
+export type UpstreamOCIRegCacheConfig = {
+  ttl_seconds: number;
+  offline_mode: boolean;
+  updated_at: string;
+};
+
+export type UpstreamOCIRegResMsg = UpstreamOCIRegEntity & {
+  auth_config: UpstreamOCIRegAuthConfig;
+  access_config: UpstreamOCIRegAccessConfig;
+  storage_config: UpstreamOCIRegStorageConfig;
+  cache_config: UpstreamOCIRegCacheConfig;
+};
+
+export type ListUpstreamRegistriesResponse = {
+  total: number;
+  page: number;
+  limit: number;
+  registeries: (UpstreamOCIRegEntity & { cached_images_count: number })[];
+};
+
 export type PostUpstreamRequestBody = {
-  registry_name : string;
-  registry_url: string;
-  auth: {
-    username: string;
-    password: string;
+  name: string;
+  port: number;
+  upstream_url: string;
+  auth_config: {
+    auth_type: "anonymous" | "basic" | "bearer";
+    credentials_json: any;
   };
-  storage: {
-    limit: number;
-    cleanup_threshold: number;
+  access_config: {
+    proxy_enabled: boolean;
+    connection_timeout: number; // in seconds
+    read_timeout: number; // in seconds
+    max_connections: number;
+    max_retries: number;
+    retry_delay: number; // in seconds
   };
-  cache: {
-    ttl: number;
+  storage_config: {
+    storage_limit: number; // in MB
+    cleanup_policy: string; // optionally can narrow to `"lru_1m"` | other policies
+    cleanup_threshold: number; // in percent
+  };
+  cache_config: {
+    ttl_seconds: number;
     offline_mode: boolean;
-  },
-  proxy: {
-    enable: boolean; 
-    url: string;
-    retries: number;
-    socket_timeout: number;
-  }
-}
+  };
+};
+
+export type PostUpstreamResponseBody = {
+  reg_id?: string | undefined;
+  reg_name?: string | undefined;
+  error?: string | undefined;
+};
+
+export type GetUpstreamResponseBody = UpstreamOCIRegResMsg;
+
+export type SearchImageResponseBody = {
+  count: number;
+  results: {
+    [registery_key: string]: {
+      registry_key: string;
+      namespace: string;
+      image_repository: string;
+      tag: string;
+      pull_command: string;
+    }[];
+  };
+};
+
+type ImageTagEntity = {
+  tag: string;
+  pull_command: string;
+  last_updated_at: Date;
+};
+
+type ImageRepositoryEntity = {
+  image_repository: string;
+  tags: ImageTagEntity[];
+};
+
+type NamespaceEntity = {
+  namespace: string;
+  image_repositories: ImageRepositoryEntity[];
+};
+
+export type ImagesTreeData = {
+  default_registry: {
+    registry_name: string;
+    registry_url: string;
+    port: number;
+    auth: {
+      username: string;
+      password: string;
+    };
+    storage: {
+      limit: number;
+      cleanup_threshold: number;
+    };
+    cache: {
+      ttl: number;
+      offline_mode: boolean;
+    };
+    proxy: {
+      enable: boolean;
+      url: string;
+      retries: number;
+      socket_timeout: number;
+    };
+  };
+  registeries: {
+    registry_name: string;
+    registry_url: string;
+    port: number;
+    auth: {
+      username: string;
+      password: string;
+    };
+    storage: {
+      limit: number;
+      cleanup_threshold: number;
+    };
+    cache: {
+      ttl: number;
+      offline_mode: boolean;
+    };
+    proxy: {
+      enable: boolean;
+      url: string;
+      retries: number;
+      socket_timeout: number;
+    };
+  }[];
+};

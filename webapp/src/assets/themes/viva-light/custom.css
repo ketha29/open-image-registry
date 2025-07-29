@@ -61,3 +61,80 @@
 .bg-json-or-code-view {
   background-color: #f5f7f9;
 }
+
+
+.custom-toast-container .p-toast {
+  opacity: 0.95;
+}
+
+.custom-toast-container .p-toast .p-toast-message {
+  margin: 0 0 1rem 0;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  animation: slideInFromRight 0.4s ease-out;
+}
+
+.custom-toast-container .p-toast .p-toast-message .p-toast-message-content {
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+/* Hide default toast elements */
+.custom-toast-container .p-toast .p-toast-message .p-toast-message-text,
+.custom-toast-container .p-toast .p-toast-message .p-toast-message-icon,
+.custom-toast-container .p-toast .p-toast-message .p-toast-icon-close {
+    display: none !important;
+}
+
+/* Ensure custom template shows properly */
+.custom-toast-container .p-toast .p-toast-message .p-toast-message-content > div {
+  display: block !important;
+}
+
+/* Animation for toast entrance */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+    }
+}
+
+/* Hover effect for close button */
+.custom-toast-container .pi-times:hover {
+  opacity: 0.7;
+  transform: scale(1.1);
+  transition: all 0.2s ease;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .custom-toast-container .p-toast .p-toast-message > div {
+  width: 18rem !important;
+  margin: 0.5rem !important;
+  }
+}
+  
+.status-circle {
+  max-width: 10px;
+  max-height: 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-active {
+  background-color: #58cd9a;
+}
+
+.status-disabled {
+  background-color: #dc3545;
+}

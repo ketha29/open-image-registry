@@ -12,48 +12,54 @@ import { Button } from "primereact/button";
 import UpstreamRegistry from "./UpstreamsRegistry";
 import ImagesView from "./ImagesView";
 import LogoComponent from "./LogoComponent";
+import { ToastProvider } from "./ToastComponent";
 
 const RootLayout = () => {
   const [showUpstreamModal, setShowUpstreamModal] = useState<boolean>(false);
   const [showImagesModal, setShowImagesModal] = useState<boolean>(false);
 
   return (
-    <div className="flex flex-column min-h-screen max-h-screen">
-      <div className="flex-grow-0  h-5rem w-screen flex flex-row justify-content-betweenjustify-content-end align-items-center mr-4 gap-3">
-        <LogoComponent/>
+    <ToastProvider>
+      <div className="flex flex-column min-h-screen max-h-screen">
+        <div className="flex-grow-0  h-5rem w-screen flex flex-row justify-content-betweenjustify-content-end align-items-center mr-4 gap-3">
+          <LogoComponent />
 
-        <div className="flex-grow-1 flex justify-content-end gap-3 pr-4 text-color">
-          <div
-            className="cursor-pointer"
-            style={{ zIndex: 50 }}
-            onClick={() => setShowImagesModal(true)}
-          >
-            Images
-          </div>
-          <div
-            className="cursor-pointer"
-            style={{ zIndex: 50 }}
-            onClick={() => setShowUpstreamModal(true)}
-          >
-            Upstreams
-          </div>
-          <div className="cursor-pointer" style={{ zIndex: 50 }}>
-            Settings
+          <div className="flex-grow-1 flex justify-content-end gap-3 pr-4 text-color">
+            <div
+              className="cursor-pointer"
+              style={{ zIndex: 50 }}
+              onClick={() => setShowImagesModal(true)}
+            >
+              Images
+            </div>
+            <div
+              className="cursor-pointer"
+              style={{ zIndex: 50 }}
+              onClick={() => setShowUpstreamModal(true)}
+            >
+              Upstreams
+            </div>
+            <div className="cursor-pointer" style={{ zIndex: 50 }}>
+              Settings
+            </div>
           </div>
         </div>
-      </div>
-      <div className="flex-grow-1 flex align-items-stretch">
-        <Outlet />
-      </div>
-      {/* For upstreams */}
-      <UpstreamRegistry
-        visible={showUpstreamModal}
-        hideCallback={setShowUpstreamModal}
-      />
+        <div className="flex-grow-1 flex align-items-stretch">
+          <Outlet />
+        </div>
+        {/* For upstreams */}
+        <UpstreamRegistry
+          visible={showUpstreamModal}
+          hideCallback={setShowUpstreamModal}
+        />
 
-      {/* For Images view */}
-      <ImagesView visible={showImagesModal} hideCallback={setShowImagesModal} />
-    </div>
+        {/* For Images view */}
+        <ImagesView
+          visible={showImagesModal}
+          hideCallback={setShowImagesModal}
+        />
+      </div>
+    </ToastProvider>
   );
 };
 
