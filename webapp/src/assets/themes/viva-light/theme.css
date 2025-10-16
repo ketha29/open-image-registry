@@ -3748,8 +3748,8 @@
     background-color: transparent;
     border: 0 none;
     color: #898989;
-    min-width: 2.857rem;
-    height: 2.857rem;
+    min-width: 1.8rem;
+    height: 1.8rem;
     margin: 0.143rem;
     transition: box-shadow 0.3s;
     border-radius: 6px;
@@ -3788,8 +3788,8 @@
     background-color: transparent;
     border: 0 none;
     color: #898989;
-    min-width: 2.857rem;
-    height: 2.857rem;
+    min-width: 1.8 rem;
+    height: 1.8rem;
     margin: 0.143rem;
     padding: 0 0.5rem;
   }
@@ -3797,14 +3797,14 @@
     background-color: transparent;
     border: 0 none;
     color: #898989;
-    min-width: 2.857rem;
-    height: 2.857rem;
+    min-width: 1.8rem;
+    height: 1.8rem;
     margin: 0.143rem;
     transition: box-shadow 0.3s;
     border-radius: 6px;
   }
   .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
-    background: #ced6f1;
+    background: var(--p-surface-50);
     border-color: #ced6f1;
     color: #585858;
   }
@@ -3813,6 +3813,12 @@
     border-color: transparent;
     color: #6c6c6c;
   }
+
+.p-paginator-element button {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
   .p-picklist .p-picklist-buttons {
     padding: 1rem;
   }
@@ -5035,7 +5041,7 @@
     box-shadow: 0px 11px 15px -7px rgba(0, 0, 0, 0.2), 0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 9px 46px 8px rgba(0, 0, 0, 0.12);
   }
   .p-sidebar .p-sidebar-header {
-    padding: 1rem;
+    padding: 0rem;
   }
   .p-sidebar .p-sidebar-header .p-sidebar-close,
   .p-sidebar .p-sidebar-header .p-sidebar-icon {
@@ -5063,7 +5069,7 @@
     padding-top: 0;
   }
   .p-sidebar .p-sidebar-content {
-    padding: 1rem;
+    padding: 0rem;
   }
   .p-tooltip .p-tooltip-text {
     background: #585858;
