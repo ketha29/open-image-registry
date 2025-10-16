@@ -1,0 +1,1 @@
+We'll store the email templates here.
