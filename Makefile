@@ -6,6 +6,6 @@ build-server:
 build-ui: 
 	cd webapp && npm run build
 
-run-server: build-server build-ui
-	cd server/bin && ./open-image-registry-server --webapp-build-path=$(shell pwd)/webapp/build
+run-server: build-server
+	cd server/bin && ./open-image-registry-server
 	
