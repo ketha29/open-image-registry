@@ -113,3 +113,14 @@ func ParseSqliteTimestamp(timeStr string) (time.Time, error) {
 
 	return time.Time{}, fmt.Errorf("cannot parse SQLite timestamp: %s", timeStr)
 }
+
+var usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9._-]{3,32}$`)
+var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+
+func IsValidUsername(username string) bool {
+	return usernameRegex.Match([]byte(username))
+}
+
+func IsValidEmail(email string) bool {
+	return emailRegex.Match([]byte(email))
+}
