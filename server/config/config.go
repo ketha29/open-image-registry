@@ -9,6 +9,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var appConfiguration *AppConfig
+
 type AppConfig struct {
 	Server           MgmtServerConfig       `yaml:"server"`
 	ImageRegistry    ImageRegistryConfig    `yaml:"image_registry"`
@@ -18,6 +20,7 @@ type AppConfig struct {
 	Storage          StorageConfig          `yaml:"storage"`
 	Notification     NotificationConfig     `yaml:"notification"`
 	WebApp           WebAppConfig           `yaml:"webapp"`
+	Development      DevelopmentConfig      `yaml:"development"`
 }
 
 func LoadConfig(configPath, appHome string) (*AppConfig, error) {
@@ -39,6 +42,7 @@ func LoadConfig(configPath, appHome string) (*AppConfig, error) {
 		return nil, fmt.Errorf("invalid config: %s", errMsg)
 	}
 
+	appConfiguration = appConfig
 	return appConfig, nil
 }
 
@@ -223,4 +227,27 @@ type EmailSenderConfig struct {
 type WebAppConfig struct {
 	EnableUI bool   `yaml:"enable_ui"`
 	DistPath string `yaml:"dist_path"`
+}
+
+type DevelopmentConfig struct {
+	Enable    bool `yaml:"enable"`
+	MockEmail bool `yaml:"mock_email"`
+}
+
+func GetDevelopmentConfig() DevelopmentConfig {
+	if appConfiguration == nil {
+		return DevelopmentConfig{}
+	}
+	return appConfiguration.Development
+}
+
+func GetDefaultEmailSenderConfig() *EmailSenderConfig {
+	return &EmailSenderConfig{
+		Enabled:      false,
+		SmtpHost:     "localhost",
+		SmtpPort:     25,
+		SmtpUser:     "",
+		SmtpPassword: "",
+		FromAddress:  "noreply@test.com",
+	}
 }

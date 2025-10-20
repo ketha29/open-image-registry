@@ -25,7 +25,7 @@ storage:
   path: "${app_home}/server/temp"
 
 notification:
-# By default, email notification is disabled. To invite new user, email configuration must be enabled.
+  # By default, email notification is disabled. To invite new user, email configuration must be enabled.
   email:
     enabled: false
     smtp_host: ""
@@ -37,3 +37,7 @@ notification:
 webapp:
   enable_ui: false
   dist_path: ${app_home}/webapp/build
+
+development:
+  enable: true
+  mock_email: true # Instead of sending email, print the link/uuid in logs
