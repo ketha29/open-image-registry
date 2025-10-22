@@ -175,10 +175,14 @@ func (u *upstreamDaoImpl) GetUpstreamRegistryWithConfig(regId string) (reg *mode
 		return nil, nil, nil, nil, nil, db.ClassifyError(err, GetUpstreamRegistryWithConfig)
 	}
 
-	reg.CreatedAt, err = utils.ParseSqliteTimestamp(regCreatedAt)
+	createdTime, err := utils.ParseSqliteTimestamp(regCreatedAt)
 	if err != nil {
 		log.Logger().Error().Err(err).Msgf("Error occured when parsing sqlite-timestamp: %s", regCreatedAt)
 	}
+	if createdTime != nil {
+		reg.CreatedAt = *createdTime
+	}
+
 	reg.UpdatedAt, err = utils.ParseSqliteTimestamp(regUpdatedAt)
 	if err != nil {
 		log.Logger().Error().Err(err).Msgf("Error occured when parsing sqlite-timestamp: %s", regUpdatedAt)
@@ -234,11 +238,14 @@ func (u *upstreamDaoImpl) ListUpstreamRegistries() (registeries []*models.Upstre
 			continue
 		}
 
-		// we just ignore the timestamp parse errors
-		uptreamReg.CreatedAt, err = utils.ParseSqliteTimestamp(createdAt)
+		createdTime, err := utils.ParseSqliteTimestamp(createdAt)
 		if err != nil {
 			log.Logger().Error().Err(err).Msgf("Error occured when parsing timestamp: %s", createdAt)
 		}
+		if createdTime != nil {
+			uptreamReg.CreatedAt = *createdTime
+		}
+
 		uptreamReg.UpdatedAt, err = utils.ParseSqliteTimestamp(updatedAt)
 		if err != nil {
 			log.Logger().Error().Err(err).Msgf("Error occured when parsing timestamp: %s", updatedAt)
