@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ksankeerth/open-image-registry/client"
+	"github.com/ksankeerth/open-image-registry/client/registryclient"
 	client_errors "github.com/ksankeerth/open-image-registry/errors/client"
 	"github.com/ksankeerth/open-image-registry/types/api/v1alpha/dockerv2"
 	"github.com/ksankeerth/open-image-registry/types/api/v1alpha/oci"
@@ -133,7 +133,7 @@ func (svc *RegistryService) loadImageBlob(namespace, repository,
 			}
 		}
 
-		dockerClient := client.NewDockerV2RegistryClient(svc.upstreamRegistry.reg.UpstreamUrl, svc.upstreamRegistry.authConfig.TokenEndpoint)
+		dockerClient := registryclient.NewDockerV2RegistryClient(svc.upstreamRegistry.reg.UpstreamUrl, svc.upstreamRegistry.authConfig.TokenEndpoint)
 		dockerClient.SetWireLogging(true)
 		if cacheMiss || !skipContent {
 			content, err := dockerClient.GetBlob(namespace, repository, digest)
@@ -593,7 +593,7 @@ func (svc *RegistryService) loadImageManifestFromDbByDigest(namespace, repositor
 func (svc *RegistryService) loadImageManifestFromRegistry(namespace, repository, tagOrDigest string,
 	skipContent bool) (exists bool, digest, mediaType string, content []byte, err error) {
 
-	dockerClient := client.NewDockerV2RegistryClient(svc.upstreamRegistry.reg.UpstreamUrl, svc.upstreamRegistry.authConfig.TokenEndpoint)
+	dockerClient := registryclient.NewDockerV2RegistryClient(svc.upstreamRegistry.reg.UpstreamUrl, svc.upstreamRegistry.authConfig.TokenEndpoint)
 	dockerClient.SetWireLogging(true)
 
 	if skipContent {
