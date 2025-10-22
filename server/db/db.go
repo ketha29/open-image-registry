@@ -10,6 +10,7 @@ import (
 
 	sqlite3 "modernc.org/sqlite"
 
+	"github.com/ksankeerth/open-image-registry/config"
 	"github.com/ksankeerth/open-image-registry/errors/db"
 	"github.com/ksankeerth/open-image-registry/lib"
 	"github.com/ksankeerth/open-image-registry/log"
@@ -20,23 +21,18 @@ var initCalled int32
 // InitDB initializes the DB and transaction manager.
 // Returns an error if initialization failed.
 // This method must be called once and repeated calls will panic
-func InitDB() (database *sql.DB, tm *TransactionManager, err error) {
+func InitDB(dbConfig *config.DatabaseConfig) (database *sql.DB, tm *TransactionManager, err error) {
 
 	if !atomic.CompareAndSwapInt32(&initCalled, 0, 1) {
 		panic("InitDB() called multiple times - should only be called once from main.go")
 	}
 
-	serverDir, err := os.Getwd()
-	if err != nil {
-		log.Logger().Error().Err(err).Msgf("Unable to get current working directory")
-		return
-	}
+	dbScriptsPath := filepath.Join(filepath.Dir(dbConfig.Path), "db-scripts/sqlite/registry.sql")
 
 	// Register sqlite driver with hooks
 	sql.Register("sqlite-hooked", &sqlite3.Driver{})
 
-	dbPath := filepath.Join(filepath.Dir(serverDir), "registry_sqlite.db")
-	database, err = sql.Open("sqlite-hooked", fmt.Sprintf("file:%s?cache=shared&_fk=1", dbPath))
+	database, err = sql.Open("sqlite-hooked", fmt.Sprintf("file:%s?cache=shared&_fk=1", dbConfig.Path))
 	if err != nil {
 		log.Logger().Error().Err(err).Msgf("Unable to initialize database from configuration")
 		return
@@ -51,8 +47,7 @@ func InitDB() (database *sql.DB, tm *TransactionManager, err error) {
 	}
 
 	// Run schema migrations
-	scriptsPath := filepath.Join(filepath.Dir(serverDir), "db-scripts/sqlite/registry.sql")
-	contentBytes, err := os.ReadFile(scriptsPath)
+	contentBytes, err := os.ReadFile(dbScriptsPath)
 	if err != nil {
 		database.Close()
 		database = nil
@@ -173,6 +168,27 @@ func NewImageRegistryDAO(database *sql.DB, tm *TransactionManager) ImageRegistry
 
 func NewUpstreamDAO(database *sql.DB, tm *TransactionManager) UpstreamDAO {
 	return &upstreamDaoImpl{
+		db:                 database,
+		TransactionManager: tm,
+	}
+}
+
+func NewOauthDAO(database *sql.DB, tm *TransactionManager) OAuthDAO {
+	return &oauthDaoImpl{
+		db:                 database,
+		TransactionManager: tm,
+	}
+}
+
+func NewResourceAccessDAO(database *sql.DB, tm *TransactionManager) ResourceAccessDAO {
+	return &accessDaoImpl{
+		db:                 database,
+		TransactionManager: tm,
+	}
+}
+
+func NewUserDAO(database *sql.DB, tm *TransactionManager) UserDAO {
+	return &userDaoImpl{
 		db:                 database,
 		TransactionManager: tm,
 	}
