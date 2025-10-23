@@ -4,7 +4,6 @@ import { classNames } from "primereact/utils";
 
 type LogoProps = {
   showNameInOneLine: boolean;
-  // showNameAndLogoInOneLine: boolean;
 };
 
 const LogoComponent = (props: LogoProps) => {

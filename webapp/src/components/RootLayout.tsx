@@ -1,64 +1,113 @@
-import React, { useState } from "react";
-import { Outlet } from "react-router-dom";
-import logo from "./../assets/logo.png";
-import { Sidebar } from "primereact/sidebar";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Stepper } from "primereact/stepper";
-import { StepperPanel } from "primereact/stepperpanel";
+import React, { useEffect, useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+
 import { Divider } from "primereact/divider";
-import { Fieldset } from "primereact/fieldset";
-import { Button } from "primereact/button";
 import UpstreamRegistry from "./UpstreamsRegistry";
 import ImagesView from "./ImagesView";
 import LogoComponent from "./LogoComponent";
 import { ToastProvider } from "./ToastComponent";
+import LoginPage from "../pages/LoginPage";
+import AdminPanelComponent from "./AdminPanel";
+import NewAccountSetupPage from "../pages/NewAccountSetupPage";
 
 const RootLayout = () => {
   const [showUpstreamModal, setShowUpstreamModal] = useState<boolean>(false);
   const [showImagesModal, setShowImagesModal] = useState<boolean>(false);
+  const [showAdminPanel, setShowAdminPanel] = useState<boolean>(false);
+
+  const navigate = useNavigate();
+
+  // TODO: for the moment we'll use local storage and later we have to decie how to handle
+  // authentication and session properly
+  const [authenticated, setAuthenticated] = useState<boolean>(
+    Boolean(localStorage.getItem("authenticated"))
+  );
+
+  useEffect(() => {
+    if (!authenticated) {
+      navigate("/login");
+    }
+  }, [authenticated])
+
+  const handleLogout = () => {
+    localStorage.removeItem("authenticated");
+    navigate("/login");
+  };
 
   return (
     <ToastProvider>
-      <div className="flex flex-column min-h-screen max-h-screen">
-        <div className="flex-grow-0  h-5rem w-screen flex flex-row justify-content-betweenjustify-content-end align-items-center mr-4 gap-3">
-          <LogoComponent />
+      {authenticated && (
+        <div className="flex flex-column min-h-screen max-h-screen">
+          <div className="flex-grow-0  h-5rem w-screen flex flex-row  align-items-center justify-content-start mr-4 gap-0">
+            <div className="flex-grow-1 flex justify-content-start">
+              <LogoComponent showNameInOneLine={false} />
+            </div>
 
-          <div className="flex-grow-1 flex justify-content-end gap-3 pr-4 text-color">
-            <div
-              className="cursor-pointer"
-              style={{ zIndex: 50 }}
-              onClick={() => setShowImagesModal(true)}
-            >
-              Images
+            <div className="flex-grow-0 flex justify-content-start align-items-center gap-3 text-teal-700">
+              <div
+                className="cursor-pointer "
+                style={{ zIndex: 50 }}
+                onClick={() => setShowImagesModal(true)}
+              >
+                Images
+              </div>
+              <div
+                className="cursor-pointer"
+                style={{ zIndex: 50 }}
+                onClick={() => setShowUpstreamModal(true)}
+              >
+                Upstreams
+              </div>
+              {/* <div className="cursor-pointer" style={{ zIndex: 50 }}>
+                Settings
+              </div> */}
             </div>
-            <div
-              className="cursor-pointer"
-              style={{ zIndex: 50 }}
-              onClick={() => setShowUpstreamModal(true)}
-            >
-              Upstreams
-            </div>
-            <div className="cursor-pointer" style={{ zIndex: 50 }}>
-              Settings
+            <div className="flex-grow-o flex justify-content-end pr-3 align-items-center">
+              <Divider layout="vertical" className=" pb-1" />
+              <div
+                className="flex gap-5"
+                style={{
+                  zIndex: 20,
+                }}
+              >
+                <span
+                  className="pi pi-user text-teal-700 cursor-pointer"
+                  style={{ fontSize: "1.2rem" }}
+                ></span>
+                <span
+                  className="pi pi-cog text-teal-700 cursor-pointer"
+                  style={{ fontSize: "1.2rem" }}
+                  onClick={() => setShowAdminPanel(true)}
+                ></span>
+                <span
+                  className="pi pi-sign-out text-teal-700 cursor-pointer"
+                  style={{ fontSize: "1.2rem" }}
+                  onClick={handleLogout}
+                ></span>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex-grow-1 flex align-items-stretch">
-          <Outlet />
-        </div>
-        {/* For upstreams */}
-        <UpstreamRegistry
-          visible={showUpstreamModal}
-          hideCallback={setShowUpstreamModal}
-        />
+          <div className="flex-grow-1 flex align-items-stretch">
+            <Outlet />
+          </div>
+          {/* For upstreams */}
+          <UpstreamRegistry
+            visible={showUpstreamModal}
+            hideCallback={setShowUpstreamModal}
+          />
 
-        {/* For Images view */}
-        <ImagesView
-          visible={showImagesModal}
-          hideCallback={setShowImagesModal}
-        />
-      </div>
+          {/* For Images view */}
+          <ImagesView
+            visible={showImagesModal}
+            hideCallback={setShowImagesModal}
+          />
+          {/* For Settings View */}
+          <AdminPanelComponent
+            visible={showAdminPanel}
+            hideCallback={(hide) => setShowAdminPanel(!hide)}
+          />
+        </div>
+      )}
     </ToastProvider>
   );
 };

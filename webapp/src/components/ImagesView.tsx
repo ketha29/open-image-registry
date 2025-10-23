@@ -28,7 +28,7 @@ const ImagesView = (props: {
             registery: "proxy-docker-hub",
             namespace: "",
             image_repository: "",
-            tag: ""
+            tag: "",
           },
           children: [
             {
@@ -40,7 +40,7 @@ const ImagesView = (props: {
                 registery: "proxy-docker-hub",
                 namespace: "tensorflow",
                 image_repository: "",
-                tag: ""
+                tag: "",
               },
               children: [
                 {
@@ -52,7 +52,7 @@ const ImagesView = (props: {
                     registery: "proxy-docker-hub",
                     namespace: "tensorflow",
                     image_repository: "tensorflow",
-                    tag: ""
+                    tag: "",
                   },
                   children: [
                     {
@@ -64,7 +64,7 @@ const ImagesView = (props: {
                         registery: "proxy-docker-hub",
                         namespace: "tensorflow",
                         image_repository: "tensorflow",
-                        tag: "0.1"
+                        tag: "0.1",
                       },
                       leaf: true,
                     },
@@ -77,7 +77,7 @@ const ImagesView = (props: {
                         registery: "proxy-docker-hub",
                         namespace: "tensorflow",
                         image_repository: "tensorflow",
-                        tag: "0.2"
+                        tag: "0.2",
                       },
                       leaf: true,
                     },
@@ -90,7 +90,7 @@ const ImagesView = (props: {
                         registery: "proxy-docker-hub",
                         namespace: "tensorflow",
                         image_repository: "tensorflow",
-                        tag: "0.3"
+                        tag: "0.3",
                       },
                       leaf: true,
                     },
@@ -112,7 +112,7 @@ const ImagesView = (props: {
                         registery: "proxy-docker-hub",
                         namespace: "tensorflow",
                         image_repository: "tensorflow",
-                        tag: "0.5"
+                        tag: "0.5",
                       },
                       leaf: true,
                     },
@@ -125,7 +125,7 @@ const ImagesView = (props: {
                         registery: "proxy-docker-hub",
                         namespace: "tensorflow",
                         image_repository: "tensorflow",
-                        tag: "0.6"
+                        tag: "0.6",
                       },
                       leaf: true,
                     },
@@ -139,14 +139,18 @@ const ImagesView = (props: {
     );
   });
 
-  const showImageRepositoryView = (registery: string, namespace: string, imageRepository: string) => {
+  const showImageRepositoryView = (
+    registery: string,
+    namespace: string,
+    imageRepository: string
+  ) => {};
 
-  }
-
-  const showImageTagView = (registery: string, namespace: string, imageRepository: string, tag: string) => {
-
-  }
-
+  const showImageTagView = (
+    registery: string,
+    namespace: string,
+    imageRepository: string,
+    tag: string
+  ) => {};
 
   return (
     <Sidebar
@@ -154,9 +158,9 @@ const ImagesView = (props: {
       visible={props.visible}
       onHide={() => props.hideCallback(false)}
       header={
-        <div className="flex flex-row w-full surface-0">
+        <div className="flex flex-row w-full">
           <div className="flex flex-grow-1">
-            <LogoComponent />
+            <LogoComponent showNameInOneLine={false} />
           </div>
           <div className="flex-grow-0 flex align-items-center justify-content-center font-semibold">
             {/* Title shoud change with view we shows in right spliter panel */}
@@ -164,7 +168,7 @@ const ImagesView = (props: {
             IMAGE: proxy-docker-hub/tensorflow/tensorflow
           </div>
           <div className="flex-grow-1" style={{ visibility: "hidden" }}>
-            <LogoComponent />
+            <LogoComponent showNameInOneLine={false} />
           </div>
         </div>
       }
@@ -198,14 +202,22 @@ const ImagesView = (props: {
               </div>
 
               <div className="w-full">
-                <ImageTagsTreeView nodes={imageTagsTree} height={600}  showImageRepositoryView={showImageRepositoryView} showImageTagView={showImageTagView}/>
+                <ImageTagsTreeView
+                  nodes={imageTagsTree}
+                  height={600}
+                  showImageRepositoryView={showImageRepositoryView}
+                  showImageTagView={showImageTagView}
+                />
               </div>
             </div>
           </SplitterPanel>
           <SplitterPanel minSize={60}>
             {/* <ImagesViewSummary/> */}
-            <ImageRepositoryView registery={"proxy-docker-hub"} namespace={"tensorflow"} image_repository={"tensorflow"}/>
-
+            <ImageRepositoryView
+              registery={"proxy-docker-hub"}
+              namespace={"tensorflow"}
+              image_repository={"tensorflow"}
+            />
           </SplitterPanel>
         </Splitter>
       </div>
