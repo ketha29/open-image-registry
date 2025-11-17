@@ -188,6 +188,10 @@ type ImageRegistryConfig struct {
 	Enabled  bool   `yaml:"enabled"`
 	Hostname string `yaml:"hostname"`
 	Port     uint   `yaml:"port"`
+	// if this is true, it allows developers to create namespace on docker push
+	CreateNamespaceOnPush bool `yaml:"create_namespace_on_push"`
+	// if this is true, it allows developers to create repository on docker push
+	CreateRepositoryOnPush bool `yaml:"create_repository_on_push"`
 }
 
 type UpstreamRegistryConfig struct {
@@ -239,6 +243,14 @@ func GetDevelopmentConfig() DevelopmentConfig {
 		return DevelopmentConfig{}
 	}
 	return appConfiguration.Development
+}
+
+func GetImageRegistryConfig() ImageRegistryConfig {
+	if appConfiguration == nil {
+		return ImageRegistryConfig{}
+	}
+
+	return appConfiguration.ImageRegistry
 }
 
 func GetDefaultEmailSenderConfig() *EmailSenderConfig {

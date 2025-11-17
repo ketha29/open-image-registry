@@ -6,6 +6,8 @@ image_registry:
   enabled: true
   hostname: "localhost"
   port: 5000
+  create_namespace_on_push: true
+  create_repository_on_push: true
 
 upstream_registry:
   enabled: true
