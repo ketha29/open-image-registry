@@ -1,4 +1,4 @@
-package user
+package constants
 
 const (
 	ReasonPasswordRecoveryNewAccountSetup = iota + 1 // 1
@@ -23,18 +23,4 @@ const (
 	RoleMaintainer = "Maintainer"
 	RoleDeveloper  = "Developer"
 	RoleGuest      = "Guest"
-)
-
-var (
-	AllowedUserFilterFields = []string{
-		"role",
-		"locked",
-	}
-	AllowedUserSortFields = []string{
-		"username",
-		"email",
-		"role",
-		"display_name",
-		"last_loggedin_at",
-	}
 )

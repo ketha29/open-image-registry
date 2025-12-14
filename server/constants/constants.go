@@ -1,4 +1,19 @@
-package registry
+package constants
+
+const NamespacePurposeTeam = "team"
+const NamespacePurposeProject = "project"
+
+const ResourceStateActive = "Active"
+const ResourceStateDeprecated = "Deprecated"
+const ResourceStateDisabled = "Disabled"
+
+const ResourceTypeNamespace = "namespace"
+const ResourceTypeRepository = "repository"
+const ResourceTypeUpstream = "upstream"
+
+const AccessLevelMaintainer = "Maintainer"
+const AccessLevelDeveloper = "Developer"
+const AccessLevelGuest = "Guest"
 
 // For Upstream registries, random UUID will be generated.
 // For images which are supposed to be hosted in OpenImageRegistry,
