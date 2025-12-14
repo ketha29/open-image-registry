@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/ksankeerth/open-image-registry/db"
 	"github.com/ksankeerth/open-image-registry/errors/httperrors"
 	"github.com/ksankeerth/open-image-registry/log"
+	"github.com/ksankeerth/open-image-registry/store"
 	"github.com/ksankeerth/open-image-registry/types/api/v1alpha/mgmt"
 	"github.com/ksankeerth/open-image-registry/user"
 )
@@ -19,12 +19,10 @@ type AuthAPIHandler struct {
 }
 
 // NewAuthAPIHandler creates a new auth API handler
-func NewAuthAPIHandler(userDao db.UserDAO, accessDao db.ResourceAccessDAO, oauthDao db.OAuthDAO) *AuthAPIHandler {
+func NewAuthAPIHandler(store store.Store) *AuthAPIHandler {
 	return &AuthAPIHandler{
 		svc: &authService{
-			userDao:      userDao,
-			accessDao:    accessDao,
-			oauthDao:     oauthDao,
+			store:        store,
 			scopeRoleMap: map[string][]string{},
 		},
 	}
@@ -51,7 +49,7 @@ func (h *AuthAPIHandler) Login(w http.ResponseWriter, r *http.Request) {
 		clientIp = xForwardedFor
 	}
 
-	userAccount, namespaces, repositories, loginResult := h.svc.authenticateUser(&loginRequest, userAgent, clientIp)
+	userAccount, loginResult := h.svc.authenticateUser(&loginRequest, userAgent, clientIp)
 
 	authLoginResponse := mgmt.AuthLoginResponse{
 		Success:          loginResult.success,
@@ -70,11 +68,9 @@ func (h *AuthAPIHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	if userAccount != nil {
 		authLoginResponse.User = mgmt.UserProfileInfo{
-			UserId:       userAccount.Id,
-			Username:     userAccount.Username,
-			Role:         loginResult.userRole,
-			Namespaces:   h.userAdapter.ToNamespaceAccessSlice(namespaces),
-			Repositories: h.userAdapter.ToRepositoryAccessSlice(repositories),
+			UserId:   userAccount.Id,
+			Username: userAccount.Username,
+			Role:     loginResult.userRole,
 		}
 	}
 	err = json.NewEncoder(w).Encode(authLoginResponse)
