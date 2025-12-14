@@ -12,4 +12,6 @@ type ResourceAccessStore interface {
 	RevokeAccess(ctx context.Context, resourceId, resourceType, userId string) (err error)
 
 	List(ctx context.Context, conditions *ListQueryConditions) (entries []*models.ResourceAccessView, total int, err error)
+
+	GetUserAccess(ctx context.Context, resourceId, resourceType, userId string) (*models.ResourceAccess, error)
 }

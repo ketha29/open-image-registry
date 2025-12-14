@@ -63,10 +63,10 @@ func (b *blobMetaStore) Create(ctx context.Context, registryId, namespaceId, rep
 	return nil
 }
 
-func (b *blobMetaStore) CreateUploadSession(ctx context.Context, sessionID, namespace, repository string) error {
+func (b *blobMetaStore) CreateUploadSession(ctx context.Context, sessionID, namespaceID, repositoryID string) error {
 	q := b.getQuerier(ctx)
 
-	_, err := q.ExecContext(ctx, BlobSessionCreateQuery, sessionID, namespace, repository)
+	_, err := q.ExecContext(ctx, BlobSessionCreateQuery, sessionID, namespaceID, repositoryID)
 	if err != nil {
 		log.Logger().Error().Err(err).Msg("failed to persist image blob upload session")
 		return dberrors.ClassifyError(err, BlobSessionCreateQuery)
@@ -105,8 +105,8 @@ func (b *blobMetaStore) GetUploadSession(ctx context.Context, sessionID string) 
 	var createdAt, updatedAt string
 
 	var session models.ImageBlobUploadSessionModel
-	err := q.QueryRowContext(ctx, BlobSessionGetQuery, sessionID).Scan(&session.SessionID, &session.Namespace,
-		&session.Repository, &session.BytesReceived, &createdAt, &updatedAt)
+	err := q.QueryRowContext(ctx, BlobSessionGetQuery, sessionID).Scan(&session.SessionID, &session.NamespaceID,
+		&session.RepositoryID, &session.BytesReceived, &createdAt, &updatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil

@@ -11,7 +11,7 @@ type BlobMetaStore interface {
 
 	Create(ctx context.Context, registryId, namespaceId, repositoryId, digest, location string, size int64) (err error)
 
-	CreateUploadSession(ctx context.Context, sessionID, namespace, repository string) error
+	CreateUploadSession(ctx context.Context, sessionID, namespaceID, repositoryID string) error
 
 	UpdateUploadSession(ctx context.Context, sessionID string, bytesReceived int) error
 

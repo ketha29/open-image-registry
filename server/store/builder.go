@@ -23,6 +23,7 @@ const (
 	OpLessThan           FilterOperator = "<"
 	OpLessThanOrEqual    FilterOperator = "<="
 	OpLike               FilterOperator = "LIKE"
+	OpOR                 FilterOperator = "OR"
 )
 
 const (
@@ -33,7 +34,7 @@ const (
 type Filter struct {
 	Field    string
 	Operator FilterOperator
-	Values   []string
+	Values   []any
 }
 
 type SortOrder string
@@ -149,8 +150,29 @@ func (b *ListQueryBuilder) Build(
 	// Validate filter fields
 	if len(b.allowedFilterFields) > 0 {
 		for _, filter := range conditions.Filters {
-			if !b.isFilterFieldAllowed(filter.Field) {
+			if filter.Operator != OpOR && !b.isFilterFieldAllowed(filter.Field) {
 				return "", "", nil, fmt.Errorf("invalid filter field: %s", filter.Field)
+			}
+			if filter.Operator == OpOR {
+				if len(filter.Values) != 2 {
+					return "", "", nil, fmt.Errorf("invalid filter OR")
+				}
+				leftFilter, ok := filter.Values[0].(Filter)
+				if !ok {
+					return "", "", nil, fmt.Errorf("invalid filter OR")
+				}
+				rightFilter, ok := filter.Values[1].(Filter)
+				if !ok {
+					return "", "", nil, fmt.Errorf("invalid filter OR")
+				}
+
+				if !b.isFilterFieldAllowed(leftFilter.Field) {
+					return "", "", nil, fmt.Errorf("invalid filter field: %s", leftFilter.Field)
+				}
+
+				if !b.isFilterFieldAllowed(rightFilter.Field) {
+					return "", "", nil, fmt.Errorf("invalid filter field: %s", rightFilter.Field)
+				}
 			}
 		}
 	}
@@ -219,41 +241,13 @@ func (b *ListQueryBuilder) buildWhereClause(conditions *ListQueryConditions) (st
 	var args []any
 	argIndex := 1
 
+	var subArgs []any
+	var whereAppend string
 	// Process filters
 	for _, filter := range conditions.Filters {
-		dbField := b.transformField(filter.Field)
-
-		switch filter.Operator {
-		case OpIn:
-			if len(filter.Values) == 0 {
-				continue
-			}
-			placeholders := make([]string, len(filter.Values))
-			for i, val := range filter.Values {
-				transformedVal := b.transformValue(filter.Field, val)
-				args = append(args, transformedVal)
-				placeholders[i] = b.getPlaceholder(argIndex)
-				argIndex++
-			}
-			whereClauses = append(whereClauses, fmt.Sprintf("%s IN (%s)", dbField, strings.Join(placeholders, ", ")))
-
-		case OpEqual, OpNotEqual, OpGreaterThan, OpGreaterThanOrEqual, OpLessThan, OpLessThanOrEqual:
-			if len(filter.Values) == 0 {
-				continue
-			}
-			transformedVal := b.transformValue(filter.Field, filter.Values[0])
-			whereClauses = append(whereClauses, fmt.Sprintf("%s %s %s", dbField, filter.Operator, b.getPlaceholder(argIndex)))
-			args = append(args, transformedVal)
-			argIndex++
-
-		case OpLike:
-			if len(filter.Values) == 0 {
-				continue
-			}
-			whereClauses = append(whereClauses, fmt.Sprintf("%s LIKE %s", dbField, b.getPlaceholder(argIndex)))
-			args = append(args, fmt.Sprintf("%%%v%%", filter.Values[0]))
-			argIndex++
-		}
+		whereAppend, argIndex, subArgs = b.buildFilter(filter, argIndex)
+		whereClauses = append(whereClauses, whereAppend)
+		args = append(args, subArgs...)
 	}
 
 	// Process search term
@@ -273,6 +267,65 @@ func (b *ListQueryBuilder) buildWhereClause(conditions *ListQueryConditions) (st
 	}
 
 	return strings.Join(whereClauses, " AND "), args, nil
+}
+
+func (b *ListQueryBuilder) buildFilter(filter Filter, argIndex int) (whereAppend string, updatedArgIndex int, args []any) {
+	dbField := b.transformField(filter.Field)
+
+	switch filter.Operator {
+	case OpOR:
+		if len(filter.Values) != 2 { // skipping any values after 2nd index
+			return "", argIndex, []any{}
+		}
+		leftFilter, ok := filter.Values[0].(Filter)
+		if !ok {
+			return "", argIndex, []any{}
+		}
+
+		rightFilter, ok := filter.Values[1].(Filter)
+		if !ok {
+			return "", argIndex, []any{}
+		}
+		leftWhereAppend, leftArgIndex, leftArgs := b.buildFilter(leftFilter, argIndex)
+		rightWhereAppend, rightArgIndex, rightArgs := b.buildFilter(rightFilter, leftArgIndex)
+		if leftWhereAppend == "" || rightWhereAppend == "" {
+			// invalid OR
+			return "", argIndex, []any{}
+		}
+		return fmt.Sprintf(" (%s OR %s) ", leftWhereAppend, rightWhereAppend), rightArgIndex, append(leftArgs, rightArgs)
+	case OpIn:
+		if len(filter.Values) == 0 {
+			return "", argIndex, []any{}
+		}
+		placeholders := make([]string, len(filter.Values))
+		for i, val := range filter.Values {
+			transformedVal := b.transformValue(filter.Field, val)
+			args = append(args, transformedVal)
+			placeholders[i] = b.getPlaceholder(argIndex)
+			argIndex++
+		}
+		return fmt.Sprintf("%s IN (%s)", dbField, strings.Join(placeholders, ", ")), argIndex, args
+
+	case OpEqual, OpNotEqual, OpGreaterThan, OpGreaterThanOrEqual, OpLessThan, OpLessThanOrEqual:
+		if len(filter.Values) == 0 {
+			return "", argIndex, []any{}
+		}
+		transformedVal := b.transformValue(filter.Field, filter.Values[0])
+		whereAppend = fmt.Sprintf("%s %s %s", dbField, filter.Operator, b.getPlaceholder(argIndex))
+		args = append(args, transformedVal)
+		argIndex++
+		return whereAppend, argIndex, args
+
+	case OpLike:
+		if len(filter.Values) == 0 {
+			return "", argIndex, []any{}
+		}
+		whereAppend = fmt.Sprintf("%s LIKE %s", dbField, b.getPlaceholder(argIndex))
+		args = append(args, fmt.Sprintf("%%%v%%", filter.Values[0]))
+		argIndex++
+		return whereAppend, argIndex, args
+	}
+	return "", argIndex, []any{}
 }
 
 // isFilterFieldAllowed checks if a filter field is in the allowed list

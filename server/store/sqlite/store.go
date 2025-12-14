@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	sqlite3 "modernc.org/sqlite"
 
@@ -32,7 +31,6 @@ type Store struct {
 }
 
 func New(config config.DatabaseConfig) (*Store, error) {
-	dbScriptsPath := filepath.Join(filepath.Dir(config.Type), "db-scripts/sqlite/registry.sql")
 
 	sql.Register("sqlite-hooked", &sqlite3.Driver{})
 
@@ -51,7 +49,7 @@ func New(config config.DatabaseConfig) (*Store, error) {
 	}
 
 	// Run schema migrations
-	contentBytes, err := os.ReadFile(dbScriptsPath)
+	contentBytes, err := os.ReadFile(config.ScriptsPath)
 	if err != nil {
 		database.Close()
 		database = nil
@@ -118,7 +116,7 @@ func (s *Store) Auth() store.AuthStore {
 	return s.auth
 }
 
-func (s *Store) Upstream() store.UpstreamRegistyStore {
+func (s *Store) Upstreams() store.UpstreamRegistyStore {
 	return s.upstream
 }
 

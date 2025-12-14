@@ -1,18 +1,87 @@
 package sqlite
 
 const (
-	NamespaceCreateQuery    = `INSERT INTO REGISTRY_NAMESPACE (REGISTRY_ID, NAME, DESCRIPTION, PURPOSE, IS_PUBLIC) VALUES (?, ?, ?, ?, ?) RETURNING ID`
-	NamespaceGetQuery       = `SELECT REGISTRY_ID, NAME, DESCRIPTION, PURPOSE, IS_PUBLIC, CREATED_AT, UPDATED_AT FROM REGISTRY_NAMESPACE WHERE ID = ?`
-	NamespaceGetByNameQuery = `SELECT REGISTRY_ID, NAME, DESCRIPTION, PURPOSE, IS_PUBLIC, CREATED_AT, UPDATED_AT FROM REGISTRY_NAMESPACE WHERE REGISTRY_ID = ? AND NAME = ?`
-	NamespaceGetIDQuery     = `SELECT ID FROM REGISTRY_NAMESPACE WHERE REGISTRY_ID = ? AND NAME = ?`
-	NamespaceDeleteQuery    = `DELETE FROM REGISTRY_NAMESPACE WHERE REGISTRY_ID = ? AND ID = ?`
+	NamespaceCreateQuery             = `INSERT INTO REGISTRY_NAMESPACE (REGISTRY_ID, NAME, DESCRIPTION, PURPOSE, IS_PUBLIC) VALUES (?, ?, ?, ?, ?) RETURNING ID`
+	NamespaceGetQuery                = `SELECT REGISTRY_ID, NAME, DESCRIPTION, PURPOSE, IS_PUBLIC, STATE, CREATED_AT, UPDATED_AT FROM REGISTRY_NAMESPACE WHERE ID = ?`
+	NamespaceGetByNameQuery          = `SELECT REGISTRY_ID, NAME, DESCRIPTION, PURPOSE, IS_PUBLIC, STATE, CREATED_AT, UPDATED_AT FROM REGISTRY_NAMESPACE WHERE REGISTRY_ID = ? AND NAME = ?`
+	NamespaceGetIDQuery              = `SELECT ID FROM REGISTRY_NAMESPACE WHERE REGISTRY_ID = ? AND NAME = ?`
+	NamespaceDeleteQuery             = `DELETE FROM REGISTRY_NAMESPACE WHERE REGISTRY_ID = ? AND ID = ?`
+	NamespaceDeleteByIdentifierQuery = `DELETE FROM REGISTRY_NAMESPACE WHERE REGISTRY_ID = ? AND (ID = ? OR NAME = ?)`
+	NamespaceExistsByIdentifierQuery = `SELECT 1 FROM REGISTRY_NAMESPACE WHERE REGISTRY_ID = ? AND (ID = ? OR NAME = ?)`
+	NamespaceGetByIdentifierQuery    = `SELECT ID, REGISTRY_ID, NAME, DESCRIPTION, PURPOSE, IS_PUBLIC, CREATED_AT, UPDATED_AT FROM REGISTRY_NAMESPACE WHERE REGISTRY_ID = ? AND (ID = ? OR NAME = ?)`
+	NamespaceSetStateQuery           = `UPDATE REGISTRY_NAMESPACE SET STATE = ? WHERE ID = ?`
+	NamespaceUpdateQuery             = `UPDATE REGISTRY_NAMESPACE SET DESCRIPTION = ?, PURPOSE = ? WHERE ID = ?`
+	NamespaceSetVisiblityQuery       = `UPDATE REGISTRY_NAMESPACE SET IS_PUBLIC = ? WHERE ID = ?`
+	// IMPORTANT: Base list query avoids WHERE keywords because if we have it in one of the subquery, it will confuse query
+	// builder. Current query builder checks WHERE keyword exists or not (not intelligent enough to understand sub queries)
+	// then append WHERE at the end of base if needed
+	NamespaceListBaseQuery = `
+	SELECT 
+		rn.REGISTRY_ID AS REGISTRY_ID,
+		rn.ID AS ID,
+		rn.NAME AS NAME,
+		rn.DESCRIPTION AS DESCRIPTION,
+		rn.PURPOSE AS PURPOSE,
+		rn.IS_PUBLIC AS IS_PUBLIC,
+		rn.STATE AS STATE,
+		rn.CREATED_AT AS CREATED_AT,
+		rn.UPDATED_AT AS UPDATED_AT,
+		au.MAINTAINERS AS MAINTAINERS,
+		au.DEVELOPERS AS DEVELOPERS
+	FROM REGISTRY_NAMESPACE rn
+	LEFT JOIN (
+		SELECT 
+			ra.RESOURCE_ID,
+			GROUP_CONCAT(CASE WHEN ra.ACCESS_LEVEL = 'maintainer' THEN ua.USERNAME END) AS MAINTAINERS,
+			GROUP_CONCAT(CASE WHEN ra.ACCESS_LEVEL = 'developer' THEN ua.USERNAME END) AS DEVELOPERS
+		FROM RESOURCE_ACCESS ra
+		JOIN USER_ACCOUNT ua ON ra.USER_ID = ua.ID 
+			AND ra.RESOURCE_TYPE = 'namespace' 
+			AND ra.ACCESS_LEVEL IN ('maintainer', 'developer')
+		GROUP BY ra.RESOURCE_ID
+	) AS au ON au.RESOURCE_ID = rn.ID`
+	NamespaceCountBaseQuery = `SELECT count(*) FROM REGISTRY_NAMESPACE rn `
 )
 
 const (
-	RepositoryCreateQuery = `INSERT INTO REGISTRY_REPOSITORY(NAME, DESCRIPTION, IS_PUBLIC, NAMESPACE_ID, REGISTRY_ID) VALUES(?, ?, ?, ?, ?) RETURNING ID`
-	RepositoryGetQuery    = `SELECT ID, NAME, DESCRIPTION, IS_PUBLIC, NAMESPACE_ID, REGISTRY_ID, CREATED_AT, UPDATED_AT FROM REGISTRY_REPOSITORY WHERE ID = ?`
-	RepositoryDeleteQuery = `DELETE FROM REGISTRY_REPOSITORY WHERE ID = ?`
-	RepositoryGetIDQuery  = `SELECT ID FROM REGISTRY_REPOSITORY WHERE NAMESPACE_ID = ? AND NAME = ?`
+	RepositoryCreateQuery                  = `INSERT INTO REGISTRY_REPOSITORY(NAME, DESCRIPTION, IS_PUBLIC, NAMESPACE_ID, REGISTRY_ID, CREATED_BY) VALUES(?, ?, ?, ?, ?, ?) RETURNING ID`
+	RepositoryGetQuery                     = `SELECT ID, NAME, DESCRIPTION, IS_PUBLIC, STATE, NAMESPACE_ID, REGISTRY_ID, CREATED_AT, UPDATED_AT, CREATED_BY FROM REGISTRY_REPOSITORY WHERE ID = ?`
+	RepositoryDeleteQuery                  = `DELETE FROM REGISTRY_REPOSITORY WHERE ID = ?`
+	RepositoryUpdateQuery                  = `UPDATE REGISTRY_REPOSITORY SET DESCRIPTION = ? WHERE ID = ?`
+	RepositoryGetIDQuery                   = `SELECT ID FROM REGISTRY_REPOSITORY WHERE NAMESPACE_ID = ? AND NAME = ?`
+	RepositoryExistsQuery                  = `SELECT 1 FROM REGISTRY_REPOSITORY WHERE ID = ?`
+	RepositoryGetByIdentifierQuery         = `SELECT ID, NAME, DESCRIPTION, IS_PUBLIC, STATE, NAMESPACE_ID, REGISTRY_ID, CREATED_AT, UPDATED_AT, CREATED_BY  WHERE NAMESPACE_ID = ? AND (ID = ? OR NAME = ?)`
+	RepositoryExistsByIdentifierQuery      = `SELECT 1 FROM REGISTRY_REPOSITORY WHERE NAMESPACE_ID = ? AND (ID = ? OR NAME = ?)`
+	RepositoryDeleteByIdentifierQuery      = `DELETE FROM REGISTRY_REPOSITORY WHERE NAMESPACE_ID = ? AND (ID = ? OR NAME = ?)`
+	RepositorySetStateQuery                = `UPDATE REGISTRY_REPOSITORY SET STATE = ? WHERE ID = ?`
+	RepositorySetVisiblityQuery            = `UPDATE REGISTRY_REPOSITORY SET IS_PUBLIC = ? WHERE ID = ?`
+	RepositorySetStateByNamespaceQuery     = `UPDATE REGISTRY_REPOSITORY SET STATE = ? WHERE NAMESPACE_ID = ?`
+	RepositorySetVisiblityByNamespaceQuery = `UPDATE REGISTRY_REPOSITORY SET IS_PUBLIC = ? WHERE NAMESPACE_ID = ?`
+	// IMPORTANT: Base list query avoids WHERE keywords because if we have it in one of the subquery, it will confuse query
+	// builder. Current query builder checks WHERE keyword exists or not (not intelligent enough to understand sub queries)
+	// then append WHERE at the end of base if needed
+	RepositoryListBaseQuery = `
+	SELECT * FROM (
+		SELECT 
+			rr.REGISTRY_ID AS REGISTRY_ID,
+			rr.ID AS ID,
+			rr.NAME AS NAME,
+			rr.DESCRIPTION AS DESCRIPTION,
+			rn.NAME AS NAMESPACE,
+			rr.IS_PUBLIC AS IS_PUBLIC,
+			rr.STATE AS STATE,
+			rr.NAMESPACE_ID AS NAMESPACE_ID,
+			rr.CREATED_AT AS CREATED_AT,
+			rr.UPDATED_AT AS UPDATED_AT,
+			ua.USERNAME AS CREATED_BY,
+			COUNT(it.ID) AS TAGS
+		FROM REGISTRY_REPOSITORY rr
+		LEFT JOIN IMAGE_TAG it ON it.REPOSITORY_ID = rr.ID
+		LEFT JOIN REGISTRY_NAMESPACE rn ON rn.ID = rr.NAMESPACE_ID
+		LEFT JOIN USER_ACCOUNT ua ON ua.ID = rr.CREATED_BY
+		GROUP BY rr.ID
+	) AS repositories`
+	RepositoryCountBaseQuery = `SELECT COUNT(*) FROM REGISTRY_REPOSITORY`
 )
 
 const (
@@ -46,10 +115,10 @@ const (
 	BlobMetaCreateQuery = `INSERT INTO IMAGE_BLOB_META(NAMESPACE_ID, REGISTRY_ID, REPOSITORY_ID, BLOB_DIGEST, SIZE, LOCATION) VALUES(?, ?, ?, ?, ?, ?)`
 	BlobMetaGetQuery    = `SELECT NAMESPACE_ID, REGISTRY_ID, REPOSITORY_ID, BLOB_DIGEST, SIZE, LOCATION, CREATED_AT, UPDATED_AT FROM IMAGE_BLOB_META WHERE REPOSITORY_ID = ? AND BLOB_DIGEST = ?`
 
-	BlobSessionCreateQuery = `INSERT INTO IMAGE_BLOB_UPLOAD_SESSION(SESSION_ID, NAMESPACE, REPOSITORY) VALUES(?, ?, ?)`
+	BlobSessionCreateQuery = `INSERT INTO IMAGE_BLOB_UPLOAD_SESSION(SESSION_ID, NAMESPACE_ID, REPOSITORY_ID) VALUES(?, ?, ?)`
 	BlobSessionUpdateQuery = `UPDATE IMAGE_BLOB_UPLOAD_SESSION SET BYTES_RECEIVED = ? WHERE SESSION_ID = ?`
 	BlobSessionDeleteQuery = `DELETE FROM IMAGE_BLOB_UPLOAD_SESSION WHERE SESSION_ID = ?`
-	BlobSessionGetQuery    = `SELECT SESSION_ID, NAMESPACE, REPOSITORY, BYTES_RECEIVED, CREATED_AT, UPDATED_AT FROM IMAGE_BLOB_UPLOAD_SESSION WHERE SESSION_ID = ?`
+	BlobSessionGetQuery    = `SELECT SESSION_ID, NAMESPACE_ID, REPOSITORY_ID, BYTES_RECEIVED, CREATED_AT, UPDATED_AT FROM IMAGE_BLOB_UPLOAD_SESSION WHERE SESSION_ID = ?`
 )
 
 const (
@@ -73,7 +142,7 @@ const (
 	UserUpdatePasswordQuery              = `UPDATE USER_ACCOUNT SET PASSWORD = ?, SALT = ? WHERE ID = ?`
 	UserValidateUsernameAndEmailQuery    = `SELECT acc.USERNAME, acc.EMAIL FROM USER_ACCOUNT acc WHERE USERNAME = ? OR EMAIL = ?`
 	UserGetPasswordAndSaltQuery          = `SELECT PASSWORD, SALT FROM USER_ACCOUNT WHERE DELETED = 0 AND ID = ?`
-	UserGetUserAccountByUsernameQuery    = `SELECT ID, USERNAME, EMAIL, DISPLAY_NAME, LOCKED, FAILED_ATTEMPTS, CREATED_AT, UPDATED_AT
+	UserGetUserAccountByUsernameQuery    = `SELECT ID, USERNAME, EMAIL, DISPLAY_NAME, LOCKED, LOCKED_REASON, FAILED_ATTEMPTS, CREATED_AT, UPDATED_AT, LOCKED_AT
 		FROM USER_ACCOUNT
 		WHERE DELETED = 0 AND USERNAME = ?
 	`
@@ -81,6 +150,9 @@ const (
 		FROM USER_ACCOUNT
 		WHERE DELETED = 0 AND ID = ?
 	`
+	// IMPORTANT: Base list query avoids WHERE keywords because if we have it in one of the subquery, it will confuse query
+	// builder. Current query builder checks WHERE keyword exists or not (not intelligent enough to understand sub queries)
+	// then append WHERE at the end of base if needed
 	UserListBaseQuery = `SELECT acc.ID,
        acc.USERNAME,
        acc.EMAIL,
@@ -102,6 +174,8 @@ const (
 	LEFT JOIN OAUTH_AUTH_SESSION session ON acc.ID = session.USER_ID
 	WHERE acc.DELETED = 0
 `
+	UserCountActiveAccountByIdsQuery = `SELECT COUNT(*) FROM USER_ACCOUNT WHERE ID IN (%s) AND DELETED = 0 AND LOCKED = 0`
+
 	UserCountBaseQuery = `SELECT COUNT(*)
 	FROM USER_ACCOUNT acc
 	LEFT JOIN USER_PASSWORD_RECOVERY pwr ON acc.ID = pwr.USER_ID
@@ -115,33 +189,38 @@ const (
 )
 
 const (
-	ResourceAccessGrantQuery    = `INSERT INTO RESOURCE_ACCESS(RESOURCE_TYPE, RESOURCE_ID, USER_ID, ACCESS_LEVEL, GRANTED_BY) VALUES(?, ?, ?, ?, ?) RETURNING ID`
-	ResourceAccessRevokeQuery   = `DELETE FROM RESOURCE_ACCESS WHERE RESOURCE_ID = ? AND RESOURCE_TYPE = ? AND USER_ID = ?`
-	ResourceAccessListBaseQuery = `SELECT
-    ra.ID,
-    ra.RESOURCE_TYPE AS RESOURCE_TYPE,
-    rn.NAME AS NAMESPACE,
-    rr.NAME AS REPOSITORY,
-    ra.RESOURCE_ID as RESOURCE_ID,
-    ra.USER_ID,
-    ra.ACCESS_LEVEL,
-    ua.USERNAME AS USER,
-    ua1.USERNAME AS GRANTED_USER,
-		ra.GRANTED_BY,
-    ra.CREATED_AT as CREATED_AT
+	ResourceAccessGrantQuery  = `INSERT INTO RESOURCE_ACCESS(RESOURCE_TYPE, RESOURCE_ID, USER_ID, ACCESS_LEVEL, GRANTED_BY) VALUES(?, ?, ?, ?, ?) RETURNING ID`
+	ResourceAccessRevokeQuery = `DELETE FROM RESOURCE_ACCESS WHERE RESOURCE_ID = ? AND RESOURCE_TYPE = ? AND USER_ID = ?`
+	// IMPORTANT: Base list query avoids WHERE keywords because if we have it in one of the subquery, it will confuse query
+	// builder. Current query builder checks WHERE keyword exists or not (not intelligent enough to understand sub queries)
+	// then append WHERE at the end of base if needed
+	ResourceAccessListBaseQuery = `
+	SELECT
+		ra.ID AS ID,
+		ra.RESOURCE_TYPE AS RESOURCE_TYPE,
+		rn.NAME AS NAMESPACE,
+		rr.NAME AS REPOSITORY,
+		ra.RESOURCE_ID AS RESOURCE_ID,
+		ra.USER_ID AS USER_ID,
+		ra.ACCESS_LEVEL AS ACCESS_LEVEL,
+		ua.USERNAME AS USER,
+		ua1.USERNAME AS GRANTED_USER,
+		ra.GRANTED_BY AS GRANTED_BY,
+		ra.CREATED_AT AS CREATED_AT
 	FROM RESOURCE_ACCESS ra
 	JOIN USER_ACCOUNT ua ON ra.USER_ID = ua.ID
 	JOIN USER_ACCOUNT ua1 ON ra.GRANTED_BY = ua1.ID
 	LEFT JOIN REGISTRY_NAMESPACE rn ON ra.RESOURCE_ID = rn.ID AND ra.RESOURCE_TYPE = 'namespace'
 	LEFT JOIN REGISTRY_REPOSITORY rr ON ra.RESOURCE_ID = rr.ID AND ra.RESOURCE_TYPE = 'repository'
 	WHERE ua.DELETED = 0`
-
 	ResourceAccessCountBaseQuery = `SELECT count(*) FROM RESOURCE_ACCESS ra
 	JOIN USER_ACCOUNT ua ON ra.USER_ID = ua.ID
 	JOIN USER_ACCOUNT ua1 ON ra.GRANTED_BY = ua1.ID
 	LEFT JOIN REGISTRY_NAMESPACE rn ON ra.RESOURCE_ID = rn.ID AND ra.RESOURCE_TYPE = 'namespace'
 	LEFT JOIN REGISTRY_REPOSITORY rr ON ra.RESOURCE_ID = rr.ID AND ra.RESOURCE_TYPE = 'repository'
 	WHERE ua.DELETED = 0`
+
+	ResourceAccessGetByUserAndResourceQuery = `SELECT ID, ACCESS_LEVEL, GRANTED_BY, CREATED_AT FROM RESOURCE_ACCESS WHERE USER_ID = ? AND RESOURCE_TYPE = ? AND RESOURCE_ID = ?`
 )
 
 const (

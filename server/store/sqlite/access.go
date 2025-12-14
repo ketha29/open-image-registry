@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/ksankeerth/open-image-registry/errors/dberrors"
@@ -58,7 +59,9 @@ func (a *resourceAccessStore) List(ctx context.Context, conditions *store.ListQu
 
 	qb := store.NewQueryBuilder(store.DBTypeSqlite).
 		WithSearchFields("user").
-		WithAllowedFilterFields("access_level", "resource_type", "resource_id").
+		WithAllowedFilterFields("access_level", "resource_type", "resource_id", "namespace_id", "repository_id").
+		WithFieldTransformation("namespace_id", "rn.ID").
+		WithFieldTransformation("repository_id", "rr.ID").
 		WithAllowedSortFields("user", "granted_user", "granted_at").
 		WithFieldTransformation("granted_at", "CREATED_AT")
 
@@ -130,4 +133,38 @@ func (a *resourceAccessStore) scanResourceAccessView(rows *sql.Rows) (*models.Re
 	}
 
 	return &entry, nil
+}
+
+func (a *resourceAccessStore) GetUserAccess(ctx context.Context, resourceId, resourceType, userId string) (*models.ResourceAccess,
+	error) {
+	q := a.getQuerier(ctx)
+
+	m := models.ResourceAccess{}
+	var createdAt string
+
+	err := q.QueryRowContext(ctx, ResourceAccessGetByUserAndResourceQuery, userId, resourceType, resourceId).Scan(&m.Id,
+		&m.AccessLevel, &m.GrantedBy, &createdAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+
+	if err != nil {
+		log.Logger().Error().Err(err).Msg("failed to retreive user resource access")
+		return nil, dberrors.ClassifyError(err, ResourceAccessGetByUserAndResourceQuery)
+	}
+
+	if createdAt != "" {
+		createdTime, err := utils.ParseSqliteTimestamp(createdAt)
+		if err != nil {
+			log.Logger().Error().Err(err).Msg("failed to parse sqlite timestamp")
+			return nil, dberrors.ClassifyError(err, ResourceAccessGetByUserAndResourceQuery)
+		}
+		m.CreatedAt = *createdTime
+	}
+
+	m.UserId = userId
+	m.ResourceType = resourceType
+	m.ResourceId = resourceId
+
+	return &m, nil
 }

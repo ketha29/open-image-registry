@@ -20,4 +20,7 @@ type ImageTagStore interface {
 	UnlinkManifest(ctx context.Context, tagId string) error
 
 	GetManifestID(ctx context.Context, tagId string) (string, error)
+
+	// List(ctx context.Context, conditions *ListQueryConditions) (tags []*models.RepositoryView,
+	// 	total int, err error)
 }

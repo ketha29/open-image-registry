@@ -36,7 +36,7 @@ func (q *queries) ValidateMaintainers(ctx context.Context, userIds []string) (bo
 	query := fmt.Sprintf(CountMaintainersByIdsQuery, placeHolders)
 
 	var validMaintainers int
-	err := qr.QueryRowContext(ctx, query, &validMaintainers).Scan(&validMaintainers)
+	err := qr.QueryRowContext(ctx, query, userIds).Scan(&validMaintainers)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			log.Logger().Warn().Msg("none of users are valid maintainers")
