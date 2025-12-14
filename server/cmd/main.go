@@ -13,16 +13,18 @@ import (
 	"time"
 
 	server "github.com/ksankeerth/open-image-registry"
+	"github.com/ksankeerth/open-image-registry/access"
 	"github.com/ksankeerth/open-image-registry/auth"
 	"github.com/ksankeerth/open-image-registry/client/email"
 	"github.com/ksankeerth/open-image-registry/config"
-	"github.com/ksankeerth/open-image-registry/db"
+	"github.com/ksankeerth/open-image-registry/constants"
 	"github.com/ksankeerth/open-image-registry/listeners"
 	"github.com/ksankeerth/open-image-registry/log"
 	"github.com/ksankeerth/open-image-registry/registry"
 	"github.com/ksankeerth/open-image-registry/security"
 	"github.com/ksankeerth/open-image-registry/storage"
-	"github.com/ksankeerth/open-image-registry/upstream"
+	"github.com/ksankeerth/open-image-registry/store"
+	"github.com/ksankeerth/open-image-registry/store/sqlite"
 	"github.com/ksankeerth/open-image-registry/user"
 )
 
@@ -69,17 +71,12 @@ func main() {
 	}
 
 	// ------------ initialize database and daos ---------------
-	database, tm, err := db.InitDB(&appConfig.Database)
+
+	store, err := sqlite.New(appConfig.Database)
 	if err != nil {
-		log.Logger().Fatal().Err(err).Msgf("Server startup failed due to database initialization errors.")
+		log.Logger().Fatal().Err(err).Msgf("Server startup failed due to db store initialization errors.")
 		return
 	}
-
-	upstreamDao := db.NewUpstreamDAO(database, tm)
-	imageRegistryDao := db.NewImageRegistryDAO(database, tm)
-	userDao := db.NewUserDAO(database, tm)
-	resourceAccessDao := db.NewResourceAccessDAO(database, tm)
-	oauthDao := db.NewOauthDAO(database, tm)
 
 	// -------------------- Initialize storage ------------------
 
@@ -90,7 +87,7 @@ func main() {
 	}
 
 	// --------------------- Initialize admin user account ---------------
-	err = initializeAdminUserAccount(userDao, &appConfig.Admin)
+	err = initializeAdminUserAccount(store, &appConfig.Admin)
 	if err != nil {
 		log.Logger().Fatal().Err(err).Msg("Server startup failed due to admin user account initialization errors")
 	}
@@ -120,9 +117,9 @@ func main() {
 
 	// ------------ start serving ManagementAPIs and UI -----------------------
 	appRouter := server.AppRouter(&appConfig.WebApp,
-		upstream.NewUpstreamRegistryHandler(upstreamDao),
-		auth.NewAuthAPIHandler(userDao, resourceAccessDao, oauthDao),
-		user.NewUserAPIHandler(userDao, resourceAccessDao, emailClient),
+		auth.NewAuthAPIHandler(store),
+		user.NewUserAPIHandler(store, emailClient),
+		access.NewRegistryAccessHandler(store),
 	)
 
 	address := fmt.Sprintf("%s:%d", appConfig.Server.Hostname, appConfig.Server.Port)
@@ -147,7 +144,7 @@ func main() {
 		log.Logger().Info().Msgf("Serving UI from: %s", appConfig.WebApp.DistPath)
 	}
 
-	go startRegistryListeners(appConfig.ImageRegistry.Enabled, appConfig.ImageRegistry.Port, imageRegistryDao, upstreamDao)
+	go startRegistryListeners(appConfig.ImageRegistry.Enabled, appConfig.ImageRegistry.Port, store)
 
 	<-shutdown
 
@@ -160,13 +157,12 @@ func main() {
 	}
 }
 
-func startRegistryListeners(localRegistryEnabled bool, localRegistryPort uint,
-	registryDao db.ImageRegistryDAO, upstreamDao db.UpstreamDAO) {
+func startRegistryListeners(localRegistryEnabled bool, localRegistryPort uint, store store.Store) {
 	lm := listeners.GetListenerManager()
 
 	if localRegistryEnabled {
-		err := lm.RegisterListener(registry.HostedRegistryID, registry.HostedRegistryName, localRegistryPort,
-			registry.NewRegistryHandler(registry.HostedRegistryID, registry.HostedRegistryName, registryDao, upstreamDao).Routes(),
+		err := lm.RegisterListener(constants.HostedRegistryID, constants.HostedRegistryName, localRegistryPort,
+			registry.NewRegistryHandler(constants.HostedRegistryID, constants.HostedRegistryName, store).Routes(),
 			time.Second*10)
 		if err != nil {
 			log.Logger().Error().Err(err).Msgf("Unable to start listener for LocalRegistry")
@@ -174,15 +170,15 @@ func startRegistryListeners(localRegistryEnabled bool, localRegistryPort uint,
 		}
 	}
 
-	upstreamAddrs, err := upstreamDao.GetActiveUpstreamAddresses()
+	upstreamAddrs, err := store.Upstreams().GetAllUpstreamRegistryAddresses(context.Background())
 	if err != nil {
 		log.Logger().Error().Err(err).Msgf("Error ocurred when loading active upstream registeries' address")
 		return
 	}
 
 	for _, upstreamAddr := range upstreamAddrs {
-		err = lm.RegisterListener(upstreamAddr.Id, upstreamAddr.Name, uint(upstreamAddr.Port),
-			registry.NewRegistryHandler(upstreamAddr.Id, upstreamAddr.Name, registryDao, upstreamDao).Routes(), time.Second*10)
+		err = lm.RegisterListener(upstreamAddr.ID, upstreamAddr.Name, uint(upstreamAddr.Port),
+			registry.NewRegistryHandler(upstreamAddr.ID, upstreamAddr.Name, store).Routes(), time.Second*10)
 		if err != nil {
 			log.Logger().Error().Err(err).Msgf("Unable to start listener for %s", upstreamAddr.Name)
 			continue
@@ -190,27 +186,28 @@ func startRegistryListeners(localRegistryEnabled bool, localRegistryPort uint,
 	}
 }
 
-func initializeAdminUserAccount(userDao db.UserDAO, adminConfig *config.AdminUserAccountConfig) error {
-	txKey := fmt.Sprintf("initialize-admin-account-%s", adminConfig.Username)
-
-	err := userDao.Begin(txKey)
+func initializeAdminUserAccount(s store.Store, adminConfig *config.AdminUserAccountConfig) error {
+	ctx := context.Background()
+	tx, err := s.Begin(ctx)
 	if err != nil {
 		return err
 	}
+	ctx = store.WithTxContext(ctx, tx)
+
 	defer func() {
 		if err != nil {
-			userDao.Rollback(txKey)
+			tx.Rollback()
 		} else {
-			userDao.Commit(txKey)
+			tx.Commit()
 		}
 	}()
 
-	userAcc, err := userDao.GetUserAccount(adminConfig.Username, txKey)
+	userAcc, err := s.Users().GetByUsername(ctx, adminConfig.Username)
 	if err != nil {
 		return err
 	}
 	if userAcc != nil && userAcc.Locked {
-		_, err = userDao.UnlockUserAccount(adminConfig.Username, txKey)
+		err = s.Users().UnlockAccount(ctx, adminConfig.Username)
 		if err != nil {
 			return err
 		}
@@ -221,16 +218,16 @@ func initializeAdminUserAccount(userDao db.UserDAO, adminConfig *config.AdminUse
 			return err
 		}
 		passwordHash := security.GeneratePasswordHash(adminConfig.Password, salt)
-		userId, err := userDao.CreateUserAccount(adminConfig.Username, adminConfig.Email, adminConfig.Username, passwordHash, salt, txKey)
+		userId, err := s.Users().Create(ctx, adminConfig.Username, adminConfig.Email, adminConfig.Username, passwordHash, salt)
 		if err != nil {
 			return err
 		}
-		_, err = userDao.UnlockUserAccount(adminConfig.Username, txKey)
+		err = s.Users().UnlockAccount(ctx, adminConfig.Username)
 		if err != nil {
 			return err
 		}
 
-		err = userDao.AssignUserRole(user.RoleAdmin, userId, txKey)
+		err = s.Users().AssignRole(ctx, userId, constants.RoleAdmin)
 		if err != nil {
 			return err
 		}

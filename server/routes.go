@@ -10,24 +10,24 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/httplog/v2"
+	"github.com/ksankeerth/open-image-registry/access"
 	"github.com/ksankeerth/open-image-registry/auth"
 	"github.com/ksankeerth/open-image-registry/config"
 	"github.com/ksankeerth/open-image-registry/log"
-	"github.com/ksankeerth/open-image-registry/upstream"
 	"github.com/ksankeerth/open-image-registry/user"
 )
 
 func AppRouter(webappConfig *config.WebAppConfig,
-	upstreamHandler *upstream.UpstreamRegistryHandler,
 	authHandler *auth.AuthAPIHandler,
 	userHandler *user.UserAPIHandler,
+	registryAccessHandler *access.RegistryAccessHandler,
 ) *chi.Mux {
 	router := chi.NewRouter()
 
 	// Middleware setup
 	corsMiddleware := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true,
 	})
@@ -42,9 +42,9 @@ func AppRouter(webappConfig *config.WebAppConfig,
 
 	// API routes
 	router.Route("/api/v1", func(r chi.Router) {
-		r.Mount("/upstreams", upstreamHandler.Routes())
 		r.Mount("/users", userHandler.Routes())
 		r.Mount("/auth", authHandler.Routes())
+		r.Mount("/access", registryAccessHandler.Routes())
 		// Add other API routes here
 	})
 
