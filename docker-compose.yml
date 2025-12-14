@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  backend:
+    container_name: api-golang
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./server:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - CONFIG_PATH=/app/config.yaml
+    restart: unless-stopped
+
+  frontend:
+    container_name: client-react
+    build:
+      context: ./webapp
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./webapp:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://backend:8000/api
+    restart: unless-stopped
