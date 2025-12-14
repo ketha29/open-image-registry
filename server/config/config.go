@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
+	"github.com/ksankeerth/open-image-registry/constants"
 	"github.com/ksankeerth/open-image-registry/utils"
 	"gopkg.in/yaml.v3"
 )
@@ -20,6 +22,7 @@ type AppConfig struct {
 	Storage          StorageConfig          `yaml:"storage"`
 	Notification     NotificationConfig     `yaml:"notification"`
 	WebApp           WebAppConfig           `yaml:"webapp"`
+	Audit            AuditEventsConfig      `yaml:"audit"`
 	Development      DevelopmentConfig      `yaml:"development"`
 }
 
@@ -57,6 +60,7 @@ func resolveAppHomeVars(cfg *AppConfig, appHome string) {
 	}
 
 	cfg.Database.Path = replace(cfg.Database.Path)
+	cfg.Database.ScriptsPath = replace(cfg.Database.ScriptsPath)
 	cfg.Storage.Path = replace(cfg.Storage.Path)
 	cfg.WebApp.DistPath = replace(cfg.WebApp.DistPath)
 }
@@ -176,6 +180,14 @@ func defaultConfig(severHome string) *AppConfig {
 				Enabled: false,
 			},
 		},
+		Audit: AuditEventsConfig{
+			Enable:               true,
+			VerifyBucketsOnStart: true,
+			RecordsPerBucket:     constants.DefaultAuditBucketLimit,
+			AvailableBucketCount: constants.DefaultAuditSqliteBuckets,
+			BatchInsertSize:      constants.DefaultAuditBatchSize,
+			BatchInsertWaitTime:  constants.DefaultAuditBatchWaitTime,
+		},
 	}
 }
 
@@ -206,8 +218,9 @@ type AdminUserAccountConfig struct {
 }
 
 type DatabaseConfig struct {
-	Type string `yaml:"type"`
-	Path string `yaml:"path"`
+	Type        string `yaml:"type"`
+	Path        string `yaml:"path"`
+	ScriptsPath string `yaml:"scripts_path"`
 }
 
 type StorageConfig struct {
@@ -236,6 +249,17 @@ type WebAppConfig struct {
 type DevelopmentConfig struct {
 	Enable    bool `yaml:"enable"`
 	MockEmail bool `yaml:"mock_email"`
+}
+
+type AuditEventsConfig struct {
+	Enable               bool          `yaml:"enable"`
+	VerifyBucketsOnStart bool          `yaml:"verify_buckets_on_start"`
+	RecordsPerBucket     uint64        `yaml:"records_per_bucket"`
+	AvailableBucketCount uint16        `yaml:"available_bucket_count"`
+	BatchInsertSize      uint32        `yaml:"batch_insert_size"`
+	BatchInsertWaitTime  time.Duration `yaml:"batch_insert_wait_time"`
+	// TODO: for now, by default we persist audit events in database and logs.
+	// later consider supporting multiple types
 }
 
 func GetDevelopmentConfig() DevelopmentConfig {

@@ -21,6 +21,7 @@ admin:
 database:
   type: "sqlite"
   path: "${app_home}/server/registry_sqlite.db"
+  scripts_path: "${app_home}/server/db-scripts/sqlite/registry.sql"
 
 storage:
   type: "lfs"
