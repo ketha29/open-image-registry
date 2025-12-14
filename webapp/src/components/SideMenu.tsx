@@ -1,17 +1,7 @@
-import { Divider } from "primereact/divider";
-import { classNames } from "primereact/utils";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { MenuItem } from "../types/app_types";
 
-export type MenuItem = {
-  name: string;
-  key: string;
-  description: string;
-  nav_link: string;
-  icon_class?: string;
-  collapsed?: boolean;
-  children: MenuItem[];
-};
 
 export type SideMenuProps = {
   menus: MenuItem[];
@@ -22,6 +12,14 @@ export type SideMenuProps = {
 const SideMenuList = (props: SideMenuProps) => {
   //This object will track collapsed state of menus
   const [menuState, setMenuState] = useState<{ [key: string]: boolean }>({});
+
+  useEffect(() => {
+    const tempMenuState: { [key: string]: boolean } = {}
+    props.menus.forEach(m => {
+      tempMenuState[m.key] = isMenuCollapsed(m)
+    });
+    setMenuState(tempMenuState);
+  }, [props])
 
   const navigate = useNavigate();
 
@@ -41,6 +39,10 @@ const SideMenuList = (props: SideMenuProps) => {
     });
   };
 
+  const isMenuCollapsed = (menu: MenuItem): boolean => {
+    return (menu.collapsed || props.selectedMenuKey == menu.key || menu.children.map(c => c.key).includes(props.selectedMenuKey))
+  }
+
   return (
     <div className="flex flex-column w-full gap-2">
       {props.menus.map((menu) => (
@@ -57,14 +59,14 @@ const SideMenuList = (props: SideMenuProps) => {
                 &nbsp; &nbsp;&nbsp;
                 {menu.name}
               </span>
-              {(menuState[menu.key] || menu.collapsed) && (
+              {menuState[menu.key] && (
                 <span className="pi pi-angle-up" />
               )}
-              {!(menuState[menu.key] || menu.collapsed) && (
+              {!menuState[menu.key] && (
                 <span className="pi pi-angle-down" />
               )}
             </div>
-            {(menuState[menu.key] || menu.collapsed) &&
+            {menuState[menu.key] &&
               menu.children.map((submenu) => (
                 <div
                   className={

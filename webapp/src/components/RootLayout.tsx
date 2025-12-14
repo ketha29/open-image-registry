@@ -7,7 +7,7 @@ import ImagesView from "./ImagesView";
 import LogoComponent from "./LogoComponent";
 import { ToastProvider } from "./ToastComponent";
 import LoginPage from "../pages/LoginPage";
-import AdminPanelComponent from "../pages/RegistryConsolePage";
+import AdminPanelComponent from "../pages/console/RegistryConsolePage";
 import NewAccountSetupPage from "../pages/NewAccountSetupPage";
 
 const RootLayout = () => {

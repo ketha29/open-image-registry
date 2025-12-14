@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { TableColumnFilterState, TableFilterSearchPaginationSortState, UserAccountInfo } from "../types/app_types";
+import { TableColumnFilterState, TableFilterSearchPaginationSortState, UserAccountInfo } from "../../types/app_types";
 import {
   DataTable,
   DataTableStateEvent,
@@ -8,38 +8,12 @@ import { Column, ColumnSortEvent } from "primereact/column";
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { InputText } from "primereact/inputtext";
-import ChipsFilter, { ChipFilterOption } from "./ChipsFilter";
-import UserAccountView from "./UserAccountView";
-import CreateUserAccountDialog from "./CreateUserAccount";
-import HttpClient from "../client";
-import { useToast } from "./ToastComponent";
-
-const chipFilterOptions: ChipFilterOption[] = [
-  {
-    label: "Role: Admin",
-    value: "Role:Admin",
-  },
-  {
-    label: "Role: Maintainer",
-    value: "Role:Maintainer",
-  },
-  {
-    label: "Role: Developer",
-    value: "Role:Developer",
-  },
-  {
-    label: "Role: Guest",
-    value: "Role:Guest",
-  },
-  {
-    label: "Locked Accounts only",
-    value: "Status:locked",
-  },
-  {
-    label: "Active Accounts only",
-    value: "Status:unlocked",
-  },
-];
+import HttpClient from "../../client";
+import ChipsFilter from "../../components/ChipsFilter";
+import CreateUserAccountDialog from "../../components/CreateUserAccount";
+import { useToast } from "../../components/ToastComponent";
+import UserAccountView from "../../components/UserAccountView";
+import { USERS_FILTER_OPTIONS } from "../../config/table_filter";
 
 const AccountStatusBodyTemplate = (user: UserAccountInfo) => {
   const lockOpref = useRef<OverlayPanel>(null);
@@ -161,11 +135,9 @@ const UsernameColumnBodyTemplate = (user: UserAccountInfo, hideCallBack: (reload
   );
 };
 
-const UserAdministrationComponent = () => {
+const UserAdministrationPage = () => {
   const [showUserAccountView, setShowUserAccountView] =
     useState<boolean>(false);
-  const [currentUserAccount, setCurrentUserAccount] =
-    useState<UserAccountInfo>();
 
   const [showCreateUserAccountDialog, setShowCreateUserAccountDialog] =
     useState<boolean>(false);
@@ -202,8 +174,6 @@ const UserAdministrationComponent = () => {
     setShowUserAccountView(false);
   }
 
-
-
   const loadUsers = () => {
     HttpClient.getInstance("http://localhost:8000/api/v1")
       .getUsersList(filterSortPagSearchState)
@@ -217,6 +187,10 @@ const UserAdministrationComponent = () => {
         }
 
         setTotalEntries(data.total);
+
+        for (let i = 0; i < (data.total - data.users.length); i++) {
+          data.users.push({} as UserAccountInfo) // adding fake data for showing pagination properly
+        }
         setTableData(data.users);
         setTimeout(() => {
           setShowProgressView(false);
@@ -245,7 +219,7 @@ const UserAdministrationComponent = () => {
         statuses.push(v.slice("Status:".length))
       }
     });
-    if (roles.length < chipFilterOptions.map(v => v.value.startsWith("Role:")).length) {
+    if (roles.length < USERS_FILTER_OPTIONS.map(v => v.value.startsWith("Role:")).length) {
       const roleFilter = {
         key: "role" as keyof UserAccountInfo,
         values: roles,
@@ -259,7 +233,7 @@ const UserAdministrationComponent = () => {
       }
       filters.push(statusFilter);
     }
-    setFilterSortPagSearchState(s => {
+    setFilterSortPagSearchState((s: TableFilterSearchPaginationSortState<UserAccountInfo>) => {
       return {
         ...s,
         filters: filters
@@ -267,13 +241,25 @@ const UserAdministrationComponent = () => {
     })
   }
 
-  const handleSort = (event: ColumnSortEvent) => {
+  const handleSort = (event: DataTableStateEvent) => {
+    //event.sortOder always 1
 
-    setFilterSortPagSearchState((s) => {
+    setFilterSortPagSearchState((s: TableFilterSearchPaginationSortState<UserAccountInfo>) => {
+      let newSortOrder: 1 | 0 | -1 = 0
+      if (s.sort?.key == event.sortField) {
+
+        if (s.sort?.order == 1) {
+          newSortOrder = -1
+        } else if (s.sort?.order == -1) {
+          newSortOrder = 1
+        }
+      } else {
+        newSortOrder = 1
+      }
 
       const newSort = {
-        key: event.field as keyof UserAccountInfo,
-        order: event.order ?? 0,
+        key: event.sortField as keyof UserAccountInfo,
+        order: newSortOrder,
       };
       if (s) {
         return {
@@ -291,12 +277,11 @@ const UserAdministrationComponent = () => {
         },
       };
     });
-
   }
 
   const handlePagination = (event: DataTableStateEvent) => {
     // DataTableStateEvent.page starts from zero. But our filter's page starts from 1;
-    setFilterSortPagSearchState(s => {
+    setFilterSortPagSearchState((s: TableFilterSearchPaginationSortState<UserAccountInfo>) => {
       return {
         ...s,
         pagination: {
@@ -310,7 +295,7 @@ const UserAdministrationComponent = () => {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     // adding a small delay
     setTimeout(() => {
-      setFilterSortPagSearchState(s => {
+      setFilterSortPagSearchState((s: TableFilterSearchPaginationSortState<UserAccountInfo>) => {
         if (e.target.value) {
           return {
             ...s,
@@ -326,10 +311,6 @@ const UserAdministrationComponent = () => {
       })
     }, 100);
   }
-
-
-
-
 
   return (
     <div className="flex flex-column p-2 pt-4 gap-3 ">
@@ -367,20 +348,17 @@ const UserAdministrationComponent = () => {
           </div>
           <div className="flex flex-row align-items-center pl-3 pr-2 ">
             <div className=" text-sm"> Select Filter</div>
-            <ChipsFilter filterOptions={chipFilterOptions} handleFilterChange={handleFilter} />
+            <ChipsFilter filterOptions={USERS_FILTER_OPTIONS} handleFilterChange={handleFilter} />
           </div>
-          {/* <div className="flex flex-row pr-2 justify-content-end">
-             <span className="text-xs font-medium">82 users found</span>
-          </div> */}
         </div>
-        {/* <Divider layout="horizontal" className="p-0 m-0" /> */}
         <DataTable
           value={talbeData}
           paginator
-          rows={8}
+          rows={filterSortPagSearchState.pagination.limit}
           totalRecords={totalEntries}
           paginatorLeft={<div className="text-xs">{totalEntries} users found</div>}
           onPage={handlePagination}
+          onSort={handleSort}
         >
           <Column body={AccountStatusBodyTemplate} />
           <Column
@@ -388,12 +366,12 @@ const UserAdministrationComponent = () => {
             header="Username"
             body={(data) => UsernameColumnBodyTemplate(data as UserAccountInfo, handleDialogHide)}
             sortable
-            sortFunction={handleSort}
+          // sortFunction={handleSort}
           />
 
-          <Column field="email" header="Email" sortable sortFunction={handleSort} />
-          <Column field="role" header="Role" sortable sortFunction={handleSort} />
-          <Column field="display_name" header="Display Name" sortable sortFunction={handleSort} />
+          <Column field="email" header="Email" sortable />
+          <Column field="role" header="Role" sortable />
+          <Column field="display_name" header="Display Name" sortable />
           <Column
             field="last_loggedin_at"
             header="Last Logged In"
@@ -401,7 +379,6 @@ const UserAdministrationComponent = () => {
             body={(user: UserAccountInfo) => {
               return user.last_loggedin_at?.toUTCString();
             }}
-            sortFunction={handleSort}
           />
         </DataTable>
         <CreateUserAccountDialog
@@ -413,4 +390,4 @@ const UserAdministrationComponent = () => {
   );
 };
 
-export default UserAdministrationComponent;
+export default UserAdministrationPage;

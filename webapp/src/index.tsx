@@ -9,6 +9,7 @@ import "./assets/themes/viva-light/custom.css";
 import "./index.css";
 import RootLayout from "./components/RootLayout";
 import { ToastProvider } from "./components/ToastComponent";
+import { PrimeReactProvider } from "primereact/api";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -17,7 +18,11 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <ToastProvider>
-      <RouterProvider router={AppRouter} />
+      <PrimeReactProvider value={{
+        hideOverlaysOnDocumentScrolling: true,
+      }}>
+        <RouterProvider router={AppRouter} />
+      </PrimeReactProvider>
     </ToastProvider>
   </React.StrictMode>
 );

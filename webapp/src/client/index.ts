@@ -3,6 +3,8 @@ import {
   AccountSetupCompleteRequest,
   AuthLoginRequest,
   AuthLoginResponse,
+  CreateNamespaceRequest,
+  CreateNamespaceResponse,
   CreateUserAccountRequest,
   CreateUserAccountResponse,
   ListUpstreamRegistriesResponse,
@@ -362,4 +364,77 @@ export default class HttpClient {
       return { error_message: "Unexpected error occurred! Please try again." };
     }
   }
+
+  public async createNamesapce(
+    request: CreateNamespaceRequest
+  ): Promise<CreateNamespaceResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/access/registry/namespaces`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+      });
+
+      const body = await response.json();
+
+      if (response.status == 201) {
+        return body as CreateNamespaceResponse;
+      };
+
+      if (response.status == 409) {
+        return {
+          error_message: "Another namespace exists with the same name."
+        } as CreateNamespaceResponse
+      }
+      return {
+        error_message: "Unexpected error occurred. Please try again!"
+      } as CreateNamespaceResponse;
+
+    } catch (err) {
+      console.log(err);
+      return {
+        error_message: "Unexpected error occurred. Please try again!"
+      } as CreateNamespaceResponse;
+    }
+  }
+
+
+  public async namesapceAvailable(namespace: string): Promise<{ error_message?: string }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/access/registry/namespaces/${namespace}`, {
+        method: "HEAD",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+
+      if (response.status == 200) {
+        return {}
+      };
+
+      if (response.status == 400) {
+        return {
+          error_message: "Invalid Namespace name."
+        }
+      }
+
+      if (response.status == 409) {
+        return {
+          error_message: "Another namespace exists with the same name."
+        };
+      }
+      return {
+        error_message: "Unexpected error occurred. Please try again!"
+      };
+
+    } catch (err) {
+      console.log(err);
+      return {
+        error_message: "Unexpected error occurred. Please try again!"
+      };
+    }
+  }
+
 }

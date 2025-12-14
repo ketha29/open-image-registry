@@ -54,6 +54,7 @@ const NewAccountSetupPage = () => {
             setTimerCountDown((prev) => {
               if (prev === 0) {
                 clearInterval(interval);
+                navigate("/login")
                 return 0;
               }
               return prev - 1;

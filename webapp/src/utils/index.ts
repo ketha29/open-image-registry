@@ -80,3 +80,14 @@ function isAllowedSymbol(ch: string): boolean {
   const symbols = "!@#$%^&*";
   return symbols.includes(ch);
 }
+
+
+const NameRegex = /^[a-zA-Z0-9_-]+$/;
+
+export function isValidNamespace(name: string): boolean {
+  return NameRegex.test(name);
+}
+
+export function isValidRepository(name: string): boolean {
+  return NameRegex.test(name);
+}

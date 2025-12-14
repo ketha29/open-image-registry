@@ -5,13 +5,18 @@ import HomePage from "./pages/HomePage";
 import RepositoryViewPage from "./pages/RepositoryViewPage";
 import LoginPage from "./pages/LoginPage";
 import NewAccountSetupPage from "./pages/NewAccountSetupPage";
-import UserAdministrationComponent from "./components/UserAdministration";
-import RegistryConsolePage from "./pages/RegistryConsolePage";
+
+import RegistryConsolePage from "./pages/console/RegistryConsolePage";
+import UserAdministrationPage from "./pages/console/UserAdministrationPage";
+import NamespaceAccessPage from "./pages/console/NamespaceAccesPage";
+import RepositoryAccessViewPage from "./pages/console/RepositoryAccessViewPage";
+import NamespaceAccessViewPage from "./pages/console/NamespaceAccessViewPage";
+import UpstreamAccessManagementPage from "./pages/console/UpstreamAccessManagementPage";
+import RepositoryAccessPage from "./pages/console/RepositoryAccessPage";
 
 const AppRouter = createBrowserRouter([
   {
     path: "/",
-    // Component: RootLayout,
     children: [
       {
         path: "/login",
@@ -36,9 +41,34 @@ const AppRouter = createBrowserRouter([
             children: [
               {
                 path: "/console/user-management/users",
-                element: <UserAdministrationComponent />
+                element: <UserAdministrationPage />
 
               },
+              {
+                path: "/console/access-management",
+                children: [
+                  {
+                    path: "/console/access-management/namespaces/:id",
+                    element: <NamespaceAccessViewPage />
+                  },
+                  {
+                    path: "/console/access-management/namespaces",
+                    element: <NamespaceAccessPage />
+                  },
+                  {
+                    path: "/console/access-management/repositories",
+                    element: <RepositoryAccessPage />
+                  },
+                  {
+                    path: "/console/access-management/repositories/:id",
+                    element: <RepositoryAccessViewPage />
+                  },
+                  {
+                    path: "/console/access-management/upstreams",
+                    element: <UpstreamAccessManagementPage />
+                  }
+                ]
+              }
             ],
           },
           {
