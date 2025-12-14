@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog/v2"
 
+	"github.com/ksankeerth/open-image-registry/constants"
 	"github.com/ksankeerth/open-image-registry/errors/dockererrors"
 	"github.com/ksankeerth/open-image-registry/log"
 	"github.com/ksankeerth/open-image-registry/store"
@@ -84,7 +85,7 @@ func (rh *RegistryHandler) dockerV2APISupport(w http.ResponseWriter, r *http.Req
 }
 
 func (rh *RegistryHandler) initiateBlobUpload(w http.ResponseWriter, r *http.Request) {
-	if rh.registryId != HostedRegistryID {
+	if rh.registryId != constants.HostedRegistryID {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
@@ -139,7 +140,7 @@ func (rh *RegistryHandler) blobExists(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rh *RegistryHandler) handleBlobUpload(w http.ResponseWriter, r *http.Request) {
-	if rh.registryId != HostedRegistryID {
+	if rh.registryId != constants.HostedRegistryID {
 		// For the proxy registries, not allowed to upload blobs
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -325,7 +326,7 @@ func (rh *RegistryHandler) getManifest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rh *RegistryHandler) updateManifest(w http.ResponseWriter, r *http.Request) {
-	if rh.registryId != HostedRegistryID {
+	if rh.registryId != constants.HostedRegistryID {
 		dockererrors.WriteUnsupported(w)
 		return
 	}

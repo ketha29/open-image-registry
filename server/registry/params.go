@@ -4,12 +4,13 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/ksankeerth/open-image-registry/constants"
 )
 
 func extractNamespaceRepositoryAndDigest(r *http.Request) (namespace, repository, digest string) {
 	namespace = chi.URLParam(r, "namespace")
 	if namespace == "" {
-		namespace = DefaultNamespace
+		namespace = constants.DefaultNamespace
 	}
 	repository = chi.URLParam(r, "repository")
 	digest = chi.URLParam(r, "digest")
@@ -19,7 +20,7 @@ func extractNamespaceRepositoryAndDigest(r *http.Request) (namespace, repository
 func extractNamespaceRepositoryAndSessionId(r *http.Request) (namespace, repository, sessionId string) {
 	namespace = chi.URLParam(r, "namespace")
 	if namespace == "" {
-		namespace = DefaultNamespace
+		namespace = constants.DefaultNamespace
 	}
 	repository = chi.URLParam(r, "repository")
 	sessionId = chi.URLParam(r, "session_id")
@@ -29,7 +30,7 @@ func extractNamespaceRepositoryAndSessionId(r *http.Request) (namespace, reposit
 func extractNamespaceRepositoryAndTagOrDigest(r *http.Request) (namespace, repository, tagOrDigest string) {
 	namespace = chi.URLParam(r, "namespace")
 	if namespace == "" {
-		namespace = DefaultNamespace
+		namespace = constants.DefaultNamespace
 	}
 	repository = chi.URLParam(r, "repository")
 	tagOrDigest = chi.URLParam(r, "tag_or_digest")
@@ -40,7 +41,7 @@ func extractNamespaceRepositoryAndTag(r *http.Request) (namespace, repository, t
 	tag = chi.URLParam(r, "tag")
 	namespace = chi.URLParam(r, "namespace")
 	if namespace == "" {
-		namespace = DefaultNamespace
+		namespace = constants.DefaultNamespace
 	}
 	repository = chi.URLParam(r, "repository")
 	return
@@ -49,7 +50,7 @@ func extractNamespaceRepositoryAndTag(r *http.Request) (namespace, repository, t
 func extractNamespaceAndRepository(r *http.Request) (namespace, repository string) {
 	namespace = chi.URLParam(r, "namespace")
 	if namespace == "" {
-		namespace = DefaultNamespace
+		namespace = constants.DefaultNamespace
 	}
 	repository = chi.URLParam(r, "repository")
 	return

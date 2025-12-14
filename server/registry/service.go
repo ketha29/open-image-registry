@@ -11,6 +11,7 @@ import (
 	up "github.com/ksankeerth/open-image-registry/client/upstream"
 	"github.com/ksankeerth/open-image-registry/client/upstream/docker"
 	"github.com/ksankeerth/open-image-registry/config"
+	"github.com/ksankeerth/open-image-registry/constants"
 	"github.com/ksankeerth/open-image-registry/store"
 	"github.com/ksankeerth/open-image-registry/types/models"
 
@@ -40,14 +41,14 @@ func NewRegistryService(registryID, registryName string, store store.Store) *Reg
 	var upstream upstreamInfo
 	var client up.UpstreamClient
 
-	if registryID != HostedRegistryID {
+	if registryID != constants.HostedRegistryID {
 		registryModel, err := store.Upstreams().GetRegistry(context.Background(), registryID)
 		if err != nil {
 			log.Logger().Error().Err(err).Msg("Registry Service Initialization failed due to database errors")
 			return nil
 		}
 
-		if registryModel.Vendor != RegistryVendorDockerHub {
+		if registryModel.Vendor != constants.RegistryVendorDockerHub {
 			// For now, we only support docker-hub
 			// TODO: add support for other upstream registeries
 			log.Logger().Warn().Msg("OpenImageRegistry currently supports  DockerHub only")
@@ -156,7 +157,8 @@ func (svc *RegistryService) initiateBlobUpload(reqCtx context.Context, namespace
 		return "", err
 	}
 	if repositoryID == "" && cfg.CreateRepositoryOnPush {
-		repositoryID, err = svc.store.Repositories().Create(ctx, svc.registryId, namespaceID, repository, "", false)
+
+		repositoryID, err = svc.store.Repositories().Create(ctx, svc.registryId, namespaceID, repository, "", false, "todo")
 		if err != nil {
 			log.Logger().Error().Err(err).Msg("Failed to create repository on image push")
 			return "", err
@@ -435,7 +437,7 @@ func (svc *RegistryService) pullBlobFromUpstream(_ context.Context, namespace, r
 
 func (svc *RegistryService) loadImageBlob(ctx context.Context, namespace, repository,
 	digest string, skipContent bool) (exists bool, content []byte, err error) {
-	if svc.registryId == HostedRegistryID {
+	if svc.registryId == constants.HostedRegistryID {
 		return svc.loadImageBlobFromRegistry(ctx, namespace, repository, digest, skipContent)
 	} else {
 		return svc.loadImageBlobFromUpstream(ctx, namespace, repository, digest, skipContent)
@@ -658,7 +660,7 @@ func (svc *RegistryService) manifestExists(reqCtx context.Context, namespace, re
 
 func (svc *RegistryService) loadImageManifest(ctx context.Context, namespace, repository,
 	tagOrDigest string, skipContent bool) (exists bool, mediaType, digest string, content []byte, err error) {
-	if svc.registryId == HostedRegistryID {
+	if svc.registryId == constants.HostedRegistryID {
 		if utils.IsImageDigest(tagOrDigest) {
 			exists, content, mediaType, err = svc.loadManifestByDigest(ctx, namespace, repository, tagOrDigest,
 				skipContent)
