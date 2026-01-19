@@ -1,6 +1,6 @@
 {
-  "short_name": "Docker Registry",
-  "name": "Docker Registry for Home Labs",
+  "short_name": "Open Image Registry",
+  "name": "Open Image Registry",
   "icons": [
     {
       "src": "logo.png",

@@ -12,7 +12,7 @@ import { defineConfig } from 'eslint/config';
 
 export default defineConfig(
   {
-    ignores: ['dist', 'node_modules', 'build', 'coverage'],
+    ignores: ['dist', 'node_modules', 'build', 'coverage', 'vite.config.ts'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -27,7 +27,8 @@ export default defineConfig(
         ...globals.es2020,
       },
       parserOptions: {
-        projectService: true,
+        // projectService: true,
+        project: ['./tsconfig.json'],
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -59,6 +60,5 @@ export default defineConfig(
     },
   },
 
-  // 3. Prettier MUST be last to ensure it wins formatting conflicts
   prettier
 );
