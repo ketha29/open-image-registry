@@ -1,30 +1,25 @@
-import React, { useEffect, useState } from "react";
-import "./login.css";
-import LogoComponent from "../components/LogoComponent";
-import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import { Checkbox } from "primereact/checkbox";
-import HttpClient from "../client";
-import { AuthLoginRequest, AuthLoginResponse } from "../types/request_response";
-import { useToast } from "../components/ToastComponent";
-import { ProgressSpinner } from "primereact/progressspinner";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import './login.css';
+import LogoComponent from '../components/LogoComponent';
+import { InputText } from 'primereact/inputtext';
+import { Button } from 'primereact/button';
+import { Checkbox } from 'primereact/checkbox';
+import { useToast } from '../components/ToastComponent';
+import { ProgressSpinner } from 'primereact/progressspinner';
+import { useNavigate } from 'react-router-dom';
+import { postAuthLogin } from '../api';
 
 const LoginPage = () => {
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [showBackdrop, setShowBackdrop] = useState<boolean>(false);
 
   const [processing, setProcessing] = useState<boolean>(false);
 
-  const { showSuccess, showError } = useToast();
+  const [errorMsg, setErrorMsg] = useState<string>("");
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    localStorage.removeItem("authenticated");
-  }, []);
 
   useEffect(() => {
     if (!processing) {
@@ -37,49 +32,58 @@ const LoginPage = () => {
     }
   }, [processing]);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setProcessing(true);
 
-    HttpClient.getInstance("http://localhost:8000/api/v1")
-      .login({
+    const { data, error } = await postAuthLogin({
+      body: {
         username,
         password,
-        scopes: [],
-      } as AuthLoginRequest)
-      .then((data) => {
-        setProcessing(false);
-        if (data.success) {
-          showSuccess("Login Successful! Redireting to home page ...");
-          localStorage.setItem("authenticated", "true");
-          navigate("/");
-        } else {
-          showError(data.error_message);
-        }
-      })
-      .catch(() => {
-        setProcessing(false);
-        showError("Unexpected error occurred! Please try again!");
-      });
+      },
+    });
+
+    if (error) {
+      setProcessing(false);
+      setErrorMsg(error.error_message)
+    }
+
+    if (data) {
+      navigate("/");
+    }
   };
 
   return (
     <div className="flex flex-row min-h-screen max-h-screen">
       <div className="w-6 login-left-container">
         <div className="animation-container">
+          {/* Sky with clouds */}
           <div className="sky">
             <div className="cloud cloud1"></div>
             <div className="cloud cloud2"></div>
           </div>
 
+          {/* Floating Particles for atmosphere */}
+          <div className="particles">
+            <div className="particle"></div>
+            <div className="particle"></div>
+            <div className="particle"></div>
+            <div className="particle"></div>
+            <div className="particle"></div>
+          </div>
+
+          {/* Seagulls */}
           <div className="seagull seagull1"></div>
           <div className="seagull seagull2"></div>
 
+          {/* Water */}
           <div className="water">
             <div className="wave"></div>
           </div>
 
+          {/* Dock */}
           <div className="dock"></div>
 
+          {/* Ship with containers */}
           <div className="ship">
             <div className="ship-smoke">
               <div className="smoke-puff"></div>
@@ -101,6 +105,7 @@ const LoginPage = () => {
             <div className="ship-body"></div>
           </div>
 
+          {/* Crane */}
           <div className="crane">
             <div className="crane-base"></div>
             <div className="crane-tower">
@@ -112,6 +117,7 @@ const LoginPage = () => {
             </div>
           </div>
 
+          {/* Harbor storage containers */}
           <div className="harbor-storage">
             <div className="stored-container"></div>
             <div className="stored-container"></div>
@@ -135,7 +141,7 @@ const LoginPage = () => {
             style={{ zIndex: 1000 }}
           >
             <div className="flex flex-column align-items-center">
-              <ProgressSpinner style={{ width: "50px", height: "50px" }} />
+              <ProgressSpinner style={{ width: '50px', height: '50px' }} />
             </div>
           </div>
         )}
@@ -146,33 +152,20 @@ const LoginPage = () => {
               style={{
                 // fontFamily: "Major Mono Display, monospace",
                 fontSize: 20,
-                color: "#007700",
+                color: '#007700',
               }}
             >
               Welcome back
             </span>
-
-            <span
-              className="text-green-300"
-              style={{
-                // fontFamily: "Major Mono Display, monospace",
-                fontSize: 20,
-              }}
-            >
-              to
-            </span>
           </div>
           <LogoComponent showNameInOneLine={true} />
           <div className="flex flex-row justify-content-center text-color font-medium text-sm">
-            Complete authentication check!
+            Sign in to continue
           </div>
           <div className="p-4"></div>
           <div className="flex flex-column gap-4">
             <div className="flex flex-column gap-2">
-              <label
-                htmlFor="username"
-                className="text-color font-medium text-md"
-              >
+              <label htmlFor="username" className="text-color font-medium text-md">
                 Username
               </label>
               <InputText
@@ -183,10 +176,7 @@ const LoginPage = () => {
               />
             </div>
             <div className="flex flex-column gap-2">
-              <label
-                htmlFor="password"
-                className="text-color font-medium text-md"
-              >
+              <label htmlFor="password" className="text-color font-medium text-md">
                 Password
               </label>
               <InputText
@@ -203,9 +193,7 @@ const LoginPage = () => {
                   checked={rememberMe}
                   inputId="remember_me"
                   name="remember_me"
-                  onChange={(e) =>
-                    setRememberMe((currentValue) => !currentValue)
-                  }
+                  onChange={(e) => setRememberMe((currentValue) => !currentValue)}
                 />
                 <label htmlFor="remember_me" className="ml-2 text-sm">
                   Remember me
@@ -215,14 +203,17 @@ const LoginPage = () => {
                 Forgot Password?
               </div>
             </div>
+            <div className='flex justify-content-center'>
+              <span className='text-red-500 text-sm'>{errorMsg}</span>
+            </div>
             <div>
               <Button
-                className="w-full flex justify-content-center"
+                className="w-full border-round-3xl flex  gap-3 justify-content-center"
                 raised
                 size="small"
                 onClick={handleLogin}
               >
-                Sign In
+                <span>Sign In</span>
               </Button>
             </div>
           </div>
@@ -231,5 +222,4 @@ const LoginPage = () => {
     </div>
   );
 };
-
 export default LoginPage;

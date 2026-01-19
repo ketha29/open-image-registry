@@ -1,12 +1,23 @@
 /* Main Container */
 .login-left-container {
     flex: 1;
-    background: linear-gradient(135deg, #6dd5b0 0%, #2d8a5f 100%);
+    background: linear-gradient(135deg, #6dd5b0 0%, #4eb890 40%, #2d8a5f 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     overflow: hidden;
+}
+
+.login-left-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
 }
 
 .animation-container {
@@ -654,5 +665,65 @@
 
     75% {
         transform: translateX(3px) rotate(2deg);
+    }
+}
+
+.particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    animation: particleFloat 15s linear infinite;
+}
+
+.particle:nth-child(1) {
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.particle:nth-child(2) {
+    left: 30%;
+    animation-delay: -3s;
+}
+
+.particle:nth-child(3) {
+    left: 50%;
+    animation-delay: -6s;
+}
+
+.particle:nth-child(4) {
+    left: 70%;
+    animation-delay: -9s;
+}
+
+.particle:nth-child(5) {
+    left: 90%;
+    animation-delay: -12s;
+}
+
+@keyframes particleFloat {
+    0% {
+        bottom: -10%;
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.6;
+    }
+    90% {
+        opacity: 0.6;
+    }
+    100% {
+        bottom: 110%;
+        opacity: 0;
     }
 }
