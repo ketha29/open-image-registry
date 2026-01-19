@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteResourceNamespacesByIdData, DeleteResourceNamespacesByIdResponses, DeleteResourceNamespacesByIdUsersByUserIdData, DeleteResourceNamespacesByIdUsersByUserIdErrors, DeleteResourceNamespacesByIdUsersByUserIdResponses, DeleteUsersByIdData, DeleteUsersByIdErrors, DeleteUsersByIdResponses, GetOnboardingByUuidData, GetOnboardingByUuidErrors, GetOnboardingByUuidResponses, GetResourceNamespacesByIdData, GetResourceNamespacesByIdErrors, GetResourceNamespacesByIdResponses, GetResourceNamespacesByIdUsersData, GetResourceNamespacesByIdUsersErrors, GetResourceNamespacesByIdUsersResponses, GetResourceNamespacesData, GetResourceNamespacesErrors, GetResourceNamespacesResponses, GetUsersByIdData, GetUsersByIdErrors, GetUsersByIdResponses, GetUsersData, GetUsersErrors, GetUsersMeData, GetUsersMeErrors, GetUsersMeResponses, GetUsersResponses, HeadResourceNamespacesByIdData, HeadResourceNamespacesByIdErrors, HeadResourceNamespacesByIdResponses, PatchResourceNamespacesByIdStateData, PatchResourceNamespacesByIdStateErrors, PatchResourceNamespacesByIdStateResponses, PatchResourceNamespacesByIdVisibilityData, PatchResourceNamespacesByIdVisibilityErrors, PatchResourceNamespacesByIdVisibilityResponses, PostAuthLoginData, PostAuthLoginErrors, PostAuthLoginResponses, PostAuthLogoutData, PostAuthLogoutErrors, PostAuthLogoutResponses, PostOnboardingByUuidCompleteData, PostOnboardingByUuidCompleteErrors, PostOnboardingByUuidCompleteResponses, PostResourceNamespacesByIdUsersData, PostResourceNamespacesByIdUsersErrors, PostResourceNamespacesByIdUsersResponses, PostResourceNamespacesData, PostResourceNamespacesErrors, PostResourceNamespacesResponses, PostUsersData, PostUsersErrors, PostUsersResponses, PostUsersValidateData, PostUsersValidateErrors, PostUsersValidateResponses, PutResourceNamespacesByIdData, PutResourceNamespacesByIdResponses, PutUsersByIdData, PutUsersByIdEmailData, PutUsersByIdEmailErrors, PutUsersByIdEmailResponses, PutUsersByIdErrors, PutUsersByIdLockData, PutUsersByIdLockErrors, PutUsersByIdLockResponses, PutUsersByIdPasswordData, PutUsersByIdPasswordErrors, PutUsersByIdPasswordResponses, PutUsersByIdResponses, PutUsersByIdRoleData, PutUsersByIdRoleErrors, PutUsersByIdRoleResponses, PutUsersByIdUnlockData, PutUsersByIdUnlockErrors, PutUsersByIdUnlockResponses, PutUsersMeData, PutUsersMeErrors, PutUsersMeResponses } from './types.gen';
+import type { DeleteAccessNamespacesByIdData, DeleteAccessNamespacesByIdResponses, DeleteAccessNamespacesByIdUsersByUserIdData, DeleteAccessNamespacesByIdUsersByUserIdErrors, DeleteAccessNamespacesByIdUsersByUserIdResponses, DeleteUsersByIdData, DeleteUsersByIdErrors, DeleteUsersByIdResponses, GetAccessNamespacesByIdData, GetAccessNamespacesByIdErrors, GetAccessNamespacesByIdResponses, GetAccessNamespacesByIdUsersData, GetAccessNamespacesByIdUsersErrors, GetAccessNamespacesByIdUsersResponses, GetAccessNamespacesData, GetAccessNamespacesErrors, GetAccessNamespacesResponses, GetOnboardingByUuidData, GetOnboardingByUuidErrors, GetOnboardingByUuidResponses, GetUsersByIdData, GetUsersByIdErrors, GetUsersByIdResponses, GetUsersData, GetUsersErrors, GetUsersMeData, GetUsersMeErrors, GetUsersMeResponses, GetUsersResponses, HeadAccessNamespacesByIdData, HeadAccessNamespacesByIdErrors, HeadAccessNamespacesByIdResponses, PatchAccessNamespacesByIdStateData, PatchAccessNamespacesByIdStateErrors, PatchAccessNamespacesByIdStateResponses, PatchAccessNamespacesByIdVisibilityData, PatchAccessNamespacesByIdVisibilityErrors, PatchAccessNamespacesByIdVisibilityResponses, PostAccessNamespacesByIdUsersData, PostAccessNamespacesByIdUsersErrors, PostAccessNamespacesByIdUsersResponses, PostAccessNamespacesData, PostAccessNamespacesErrors, PostAccessNamespacesResponses, PostAuthLoginData, PostAuthLoginErrors, PostAuthLoginResponses, PostAuthLogoutData, PostAuthLogoutErrors, PostAuthLogoutResponses, PostOnboardingByUuidCompleteData, PostOnboardingByUuidCompleteErrors, PostOnboardingByUuidCompleteResponses, PostUsersData, PostUsersErrors, PostUsersResponses, PostUsersValidateData, PostUsersValidateErrors, PostUsersValidateResponses, PutAccessNamespacesByIdData, PutAccessNamespacesByIdResponses, PutUsersByIdData, PutUsersByIdEmailData, PutUsersByIdEmailErrors, PutUsersByIdEmailResponses, PutUsersByIdErrors, PutUsersByIdLockData, PutUsersByIdLockErrors, PutUsersByIdLockResponses, PutUsersByIdPasswordData, PutUsersByIdPasswordErrors, PutUsersByIdPasswordResponses, PutUsersByIdResponses, PutUsersByIdRoleData, PutUsersByIdRoleErrors, PutUsersByIdRoleResponses, PutUsersByIdUnlockData, PutUsersByIdUnlockErrors, PutUsersByIdUnlockResponses, PutUsersMeData, PutUsersMeErrors, PutUsersMeResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -338,26 +338,26 @@ export const putUsersByIdUnlock = <ThrowOnError extends boolean = false>(options
  * Retrieve a paginated list of registry namespaces with optional filtering, sorting, and searching.
  *
  */
-export const getResourceNamespaces = <ThrowOnError extends boolean = false>(options?: Options<GetResourceNamespacesData, ThrowOnError>) => (options?.client ?? client).get<GetResourceNamespacesResponses, GetResourceNamespacesErrors, ThrowOnError>({
+export const getAccessNamespaces = <ThrowOnError extends boolean = false>(options?: Options<GetAccessNamespacesData, ThrowOnError>) => (options?.client ?? client).get<GetAccessNamespacesResponses, GetAccessNamespacesErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'auth_token',
             type: 'apiKey'
         }],
-    url: '/resource/namespaces',
+    url: '/access/namespaces',
     ...options
 });
 
 /**
  * Create a new namespace
  */
-export const postResourceNamespaces = <ThrowOnError extends boolean = false>(options: Options<PostResourceNamespacesData, ThrowOnError>) => (options.client ?? client).post<PostResourceNamespacesResponses, PostResourceNamespacesErrors, ThrowOnError>({
+export const postAccessNamespaces = <ThrowOnError extends boolean = false>(options: Options<PostAccessNamespacesData, ThrowOnError>) => (options.client ?? client).post<PostAccessNamespacesResponses, PostAccessNamespacesErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'auth_token',
             type: 'apiKey'
         }],
-    url: '/resource/namespaces',
+    url: '/access/namespaces',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -368,52 +368,52 @@ export const postResourceNamespaces = <ThrowOnError extends boolean = false>(opt
 /**
  * Delete namespace
  */
-export const deleteResourceNamespacesById = <ThrowOnError extends boolean = false>(options: Options<DeleteResourceNamespacesByIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteResourceNamespacesByIdResponses, unknown, ThrowOnError>({
+export const deleteAccessNamespacesById = <ThrowOnError extends boolean = false>(options: Options<DeleteAccessNamespacesByIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteAccessNamespacesByIdResponses, unknown, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'auth_token',
             type: 'apiKey'
         }],
-    url: '/resource/namespaces/{id}',
+    url: '/access/namespaces/{id}',
     ...options
 });
 
 /**
  * Get namespace details
  */
-export const getResourceNamespacesById = <ThrowOnError extends boolean = false>(options: Options<GetResourceNamespacesByIdData, ThrowOnError>) => (options.client ?? client).get<GetResourceNamespacesByIdResponses, GetResourceNamespacesByIdErrors, ThrowOnError>({
+export const getAccessNamespacesById = <ThrowOnError extends boolean = false>(options: Options<GetAccessNamespacesByIdData, ThrowOnError>) => (options.client ?? client).get<GetAccessNamespacesByIdResponses, GetAccessNamespacesByIdErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'auth_token',
             type: 'apiKey'
         }],
-    url: '/resource/namespaces/{id}',
+    url: '/access/namespaces/{id}',
     ...options
 });
 
 /**
  * Check if namespace exists
  */
-export const headResourceNamespacesById = <ThrowOnError extends boolean = false>(options: Options<HeadResourceNamespacesByIdData, ThrowOnError>) => (options.client ?? client).head<HeadResourceNamespacesByIdResponses, HeadResourceNamespacesByIdErrors, ThrowOnError>({
+export const headAccessNamespacesById = <ThrowOnError extends boolean = false>(options: Options<HeadAccessNamespacesByIdData, ThrowOnError>) => (options.client ?? client).head<HeadAccessNamespacesByIdResponses, HeadAccessNamespacesByIdErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'auth_token',
             type: 'apiKey'
         }],
-    url: '/resource/namespaces/{id}',
+    url: '/access/namespaces/{id}',
     ...options
 });
 
 /**
  * Update namespace
  */
-export const putResourceNamespacesById = <ThrowOnError extends boolean = false>(options: Options<PutResourceNamespacesByIdData, ThrowOnError>) => (options.client ?? client).put<PutResourceNamespacesByIdResponses, unknown, ThrowOnError>({
+export const putAccessNamespacesById = <ThrowOnError extends boolean = false>(options: Options<PutAccessNamespacesByIdData, ThrowOnError>) => (options.client ?? client).put<PutAccessNamespacesByIdResponses, unknown, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'auth_token',
             type: 'apiKey'
         }],
-    url: '/resource/namespaces/{id}',
+    url: '/access/namespaces/{id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -426,13 +426,13 @@ export const putResourceNamespacesById = <ThrowOnError extends boolean = false>(
  *
  * Change whether a namespace is public or private.
  */
-export const patchResourceNamespacesByIdVisibility = <ThrowOnError extends boolean = false>(options: Options<PatchResourceNamespacesByIdVisibilityData, ThrowOnError>) => (options.client ?? client).patch<PatchResourceNamespacesByIdVisibilityResponses, PatchResourceNamespacesByIdVisibilityErrors, ThrowOnError>({
+export const patchAccessNamespacesByIdVisibility = <ThrowOnError extends boolean = false>(options: Options<PatchAccessNamespacesByIdVisibilityData, ThrowOnError>) => (options.client ?? client).patch<PatchAccessNamespacesByIdVisibilityResponses, PatchAccessNamespacesByIdVisibilityErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'auth_token',
             type: 'apiKey'
         }],
-    url: '/resource/namespaces/{id}/visibility',
+    url: '/access/namespaces/{id}/visibility',
     ...options
 });
 
@@ -441,13 +441,13 @@ export const patchResourceNamespacesByIdVisibility = <ThrowOnError extends boole
  *
  * Change the lifecycle state of a namespace.
  */
-export const patchResourceNamespacesByIdState = <ThrowOnError extends boolean = false>(options: Options<PatchResourceNamespacesByIdStateData, ThrowOnError>) => (options.client ?? client).patch<PatchResourceNamespacesByIdStateResponses, PatchResourceNamespacesByIdStateErrors, ThrowOnError>({
+export const patchAccessNamespacesByIdState = <ThrowOnError extends boolean = false>(options: Options<PatchAccessNamespacesByIdStateData, ThrowOnError>) => (options.client ?? client).patch<PatchAccessNamespacesByIdStateResponses, PatchAccessNamespacesByIdStateErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'auth_token',
             type: 'apiKey'
         }],
-    url: '/resource/namespaces/{id}/state',
+    url: '/access/namespaces/{id}/state',
     ...options
 });
 
@@ -456,13 +456,13 @@ export const patchResourceNamespacesByIdState = <ThrowOnError extends boolean = 
  *
  * Retrieve a paginated list of users who have access to the namespace.
  */
-export const getResourceNamespacesByIdUsers = <ThrowOnError extends boolean = false>(options: Options<GetResourceNamespacesByIdUsersData, ThrowOnError>) => (options.client ?? client).get<GetResourceNamespacesByIdUsersResponses, GetResourceNamespacesByIdUsersErrors, ThrowOnError>({
+export const getAccessNamespacesByIdUsers = <ThrowOnError extends boolean = false>(options: Options<GetAccessNamespacesByIdUsersData, ThrowOnError>) => (options.client ?? client).get<GetAccessNamespacesByIdUsersResponses, GetAccessNamespacesByIdUsersErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'auth_token',
             type: 'apiKey'
         }],
-    url: '/resource/namespaces/{id}/users',
+    url: '/access/namespaces/{id}/users',
     ...options
 });
 
@@ -478,13 +478,13 @@ export const getResourceNamespacesByIdUsers = <ThrowOnError extends boolean = fa
  * - Existing access cannot be overwritten
  *
  */
-export const postResourceNamespacesByIdUsers = <ThrowOnError extends boolean = false>(options: Options<PostResourceNamespacesByIdUsersData, ThrowOnError>) => (options.client ?? client).post<PostResourceNamespacesByIdUsersResponses, PostResourceNamespacesByIdUsersErrors, ThrowOnError>({
+export const postAccessNamespacesByIdUsers = <ThrowOnError extends boolean = false>(options: Options<PostAccessNamespacesByIdUsersData, ThrowOnError>) => (options.client ?? client).post<PostAccessNamespacesByIdUsersResponses, PostAccessNamespacesByIdUsersErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'auth_token',
             type: 'apiKey'
         }],
-    url: '/resource/namespaces/{id}/users',
+    url: '/access/namespaces/{id}/users',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -503,12 +503,12 @@ export const postResourceNamespacesByIdUsers = <ThrowOnError extends boolean = f
  * - userID path is routing only, validation is done from body
  *
  */
-export const deleteResourceNamespacesByIdUsersByUserId = <ThrowOnError extends boolean = false>(options: Options<DeleteResourceNamespacesByIdUsersByUserIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteResourceNamespacesByIdUsersByUserIdResponses, DeleteResourceNamespacesByIdUsersByUserIdErrors, ThrowOnError>({
+export const deleteAccessNamespacesByIdUsersByUserId = <ThrowOnError extends boolean = false>(options: Options<DeleteAccessNamespacesByIdUsersByUserIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteAccessNamespacesByIdUsersByUserIdResponses, DeleteAccessNamespacesByIdUsersByUserIdErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'auth_token',
             type: 'apiKey'
         }],
-    url: '/resource/namespaces/{id}/users/{userID}',
+    url: '/access/namespaces/{id}/users/{userID}',
     ...options
 });

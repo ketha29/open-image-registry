@@ -23,11 +23,11 @@ export type ErrorResponse = {
     /**
      * HTTP status code
      */
-    code: number;
+    error_code: number;
     /**
      * Error message
      */
-    message: string;
+    error_message: string;
 };
 
 export type CreateUserAccountRequest = {
@@ -419,6 +419,12 @@ export type AccessGrantRequest = {
     granted_by: string;
 };
 
+export type UserProfileInfo = {
+    user_id: string;
+    username: string;
+    role: string;
+};
+
 /**
  * Page number for pagination
  */
@@ -452,8 +458,10 @@ export type PostAuthLoginResponses = {
     /**
      * OK. Returns `auth_token` cookie.
      */
-    200: unknown;
+    200: UserProfileInfo;
 };
+
+export type PostAuthLoginResponse = PostAuthLoginResponses[keyof PostAuthLoginResponses];
 
 export type PostAuthLogoutData = {
     body?: never;
@@ -1018,7 +1026,7 @@ export type PutUsersByIdUnlockResponses = {
     200: unknown;
 };
 
-export type GetResourceNamespacesData = {
+export type GetAccessNamespacesData = {
     body?: never;
     path?: never;
     query?: {
@@ -1036,10 +1044,10 @@ export type GetResourceNamespacesData = {
         state?: 'Active' | 'Deprecated' | 'Disabled';
         purpose?: 'Team' | 'Project';
     };
-    url: '/resource/namespaces';
+    url: '/access/namespaces';
 };
 
-export type GetResourceNamespacesErrors = {
+export type GetAccessNamespacesErrors = {
     /**
      * Malformed request or validation error.
      */
@@ -1054,9 +1062,9 @@ export type GetResourceNamespacesErrors = {
     500: ErrorResponse;
 };
 
-export type GetResourceNamespacesError = GetResourceNamespacesErrors[keyof GetResourceNamespacesErrors];
+export type GetAccessNamespacesError = GetAccessNamespacesErrors[keyof GetAccessNamespacesErrors];
 
-export type GetResourceNamespacesResponses = {
+export type GetAccessNamespacesResponses = {
     /**
      * List of namespaces retrieved successfully
      */
@@ -1065,16 +1073,16 @@ export type GetResourceNamespacesResponses = {
     };
 };
 
-export type GetResourceNamespacesResponse = GetResourceNamespacesResponses[keyof GetResourceNamespacesResponses];
+export type GetAccessNamespacesResponse = GetAccessNamespacesResponses[keyof GetAccessNamespacesResponses];
 
-export type PostResourceNamespacesData = {
+export type PostAccessNamespacesData = {
     body: CreateNamespaceRequest;
     path?: never;
     query?: never;
-    url: '/resource/namespaces';
+    url: '/access/namespaces';
 };
 
-export type PostResourceNamespacesErrors = {
+export type PostAccessNamespacesErrors = {
     /**
      * Malformed request or validation error.
      */
@@ -1101,100 +1109,100 @@ export type PostResourceNamespacesErrors = {
     500: ErrorResponse;
 };
 
-export type PostResourceNamespacesError = PostResourceNamespacesErrors[keyof PostResourceNamespacesErrors];
+export type PostAccessNamespacesError = PostAccessNamespacesErrors[keyof PostAccessNamespacesErrors];
 
-export type PostResourceNamespacesResponses = {
+export type PostAccessNamespacesResponses = {
     /**
      * Namespace created successfully
      */
     201: CreateNamespaceResponse;
 };
 
-export type PostResourceNamespacesResponse = PostResourceNamespacesResponses[keyof PostResourceNamespacesResponses];
+export type PostAccessNamespacesResponse = PostAccessNamespacesResponses[keyof PostAccessNamespacesResponses];
 
-export type DeleteResourceNamespacesByIdData = {
+export type DeleteAccessNamespacesByIdData = {
     body?: never;
     path: {
         id: string;
     };
     query?: never;
-    url: '/resource/namespaces/{id}';
+    url: '/access/namespaces/{id}';
 };
 
-export type DeleteResourceNamespacesByIdResponses = {
+export type DeleteAccessNamespacesByIdResponses = {
     /**
      * Namespace deleted successfully
      */
     200: unknown;
 };
 
-export type GetResourceNamespacesByIdData = {
+export type GetAccessNamespacesByIdData = {
     body?: never;
     path: {
         id: string;
     };
     query?: never;
-    url: '/resource/namespaces/{id}';
+    url: '/access/namespaces/{id}';
 };
 
-export type GetResourceNamespacesByIdErrors = {
+export type GetAccessNamespacesByIdErrors = {
     /**
      * Resource not found.
      */
     404: ErrorResponse;
 };
 
-export type GetResourceNamespacesByIdError = GetResourceNamespacesByIdErrors[keyof GetResourceNamespacesByIdErrors];
+export type GetAccessNamespacesByIdError = GetAccessNamespacesByIdErrors[keyof GetAccessNamespacesByIdErrors];
 
-export type GetResourceNamespacesByIdResponses = {
+export type GetAccessNamespacesByIdResponses = {
     /**
      * OK
      */
     200: NamespaceResponse;
 };
 
-export type GetResourceNamespacesByIdResponse = GetResourceNamespacesByIdResponses[keyof GetResourceNamespacesByIdResponses];
+export type GetAccessNamespacesByIdResponse = GetAccessNamespacesByIdResponses[keyof GetAccessNamespacesByIdResponses];
 
-export type HeadResourceNamespacesByIdData = {
+export type HeadAccessNamespacesByIdData = {
     body?: never;
     path: {
         id: string;
     };
     query?: never;
-    url: '/resource/namespaces/{id}';
+    url: '/access/namespaces/{id}';
 };
 
-export type HeadResourceNamespacesByIdErrors = {
+export type HeadAccessNamespacesByIdErrors = {
     /**
      * Namespace not found
      */
     404: unknown;
 };
 
-export type HeadResourceNamespacesByIdResponses = {
+export type HeadAccessNamespacesByIdResponses = {
     /**
      * Namespace exists
      */
     200: unknown;
 };
 
-export type PutResourceNamespacesByIdData = {
+export type PutAccessNamespacesByIdData = {
     body: UpdateNamespaceRequest;
     path: {
         id: string;
     };
     query?: never;
-    url: '/resource/namespaces/{id}';
+    url: '/access/namespaces/{id}';
 };
 
-export type PutResourceNamespacesByIdResponses = {
+export type PutAccessNamespacesByIdResponses = {
     /**
      * Namespace updated successfully
      */
     200: unknown;
 };
 
-export type PatchResourceNamespacesByIdVisibilityData = {
+export type PatchAccessNamespacesByIdVisibilityData = {
     body?: never;
     path: {
         /**
@@ -1208,10 +1216,10 @@ export type PatchResourceNamespacesByIdVisibilityData = {
          */
         public: boolean;
     };
-    url: '/resource/namespaces/{id}/visibility';
+    url: '/access/namespaces/{id}/visibility';
 };
 
-export type PatchResourceNamespacesByIdVisibilityErrors = {
+export type PatchAccessNamespacesByIdVisibilityErrors = {
     /**
      * Invalid query parameter
      */
@@ -1234,16 +1242,16 @@ export type PatchResourceNamespacesByIdVisibilityErrors = {
     500: ErrorResponse;
 };
 
-export type PatchResourceNamespacesByIdVisibilityError = PatchResourceNamespacesByIdVisibilityErrors[keyof PatchResourceNamespacesByIdVisibilityErrors];
+export type PatchAccessNamespacesByIdVisibilityError = PatchAccessNamespacesByIdVisibilityErrors[keyof PatchAccessNamespacesByIdVisibilityErrors];
 
-export type PatchResourceNamespacesByIdVisibilityResponses = {
+export type PatchAccessNamespacesByIdVisibilityResponses = {
     /**
      * Visibility changed successfully or no-op
      */
     200: unknown;
 };
 
-export type PatchResourceNamespacesByIdStateData = {
+export type PatchAccessNamespacesByIdStateData = {
     body?: never;
     path: {
         /**
@@ -1257,10 +1265,10 @@ export type PatchResourceNamespacesByIdStateData = {
          */
         state: 'Active' | 'Deprecated' | 'Disabled';
     };
-    url: '/resource/namespaces/{id}/state';
+    url: '/access/namespaces/{id}/state';
 };
 
-export type PatchResourceNamespacesByIdStateErrors = {
+export type PatchAccessNamespacesByIdStateErrors = {
     /**
      * Invalid or missing state query parameter
      */
@@ -1283,16 +1291,16 @@ export type PatchResourceNamespacesByIdStateErrors = {
     500: ErrorResponse;
 };
 
-export type PatchResourceNamespacesByIdStateError = PatchResourceNamespacesByIdStateErrors[keyof PatchResourceNamespacesByIdStateErrors];
+export type PatchAccessNamespacesByIdStateError = PatchAccessNamespacesByIdStateErrors[keyof PatchAccessNamespacesByIdStateErrors];
 
-export type PatchResourceNamespacesByIdStateResponses = {
+export type PatchAccessNamespacesByIdStateResponses = {
     /**
      * State changed successfully or no-op if same state
      */
     200: unknown;
 };
 
-export type GetResourceNamespacesByIdUsersData = {
+export type GetAccessNamespacesByIdUsersData = {
     body?: never;
     path: {
         /**
@@ -1322,10 +1330,10 @@ export type GetResourceNamespacesByIdUsersData = {
          */
         sort?: string;
     };
-    url: '/resource/namespaces/{id}/users';
+    url: '/access/namespaces/{id}/users';
 };
 
-export type GetResourceNamespacesByIdUsersErrors = {
+export type GetAccessNamespacesByIdUsersErrors = {
     /**
      * Invalid filter or sort field
      */
@@ -1344,9 +1352,9 @@ export type GetResourceNamespacesByIdUsersErrors = {
     500: ErrorResponse;
 };
 
-export type GetResourceNamespacesByIdUsersError = GetResourceNamespacesByIdUsersErrors[keyof GetResourceNamespacesByIdUsersErrors];
+export type GetAccessNamespacesByIdUsersError = GetAccessNamespacesByIdUsersErrors[keyof GetAccessNamespacesByIdUsersErrors];
 
-export type GetResourceNamespacesByIdUsersResponses = {
+export type GetAccessNamespacesByIdUsersResponses = {
     /**
      * List of user accesses retrieved successfully
      */
@@ -1355,9 +1363,9 @@ export type GetResourceNamespacesByIdUsersResponses = {
     };
 };
 
-export type GetResourceNamespacesByIdUsersResponse = GetResourceNamespacesByIdUsersResponses[keyof GetResourceNamespacesByIdUsersResponses];
+export type GetAccessNamespacesByIdUsersResponse = GetAccessNamespacesByIdUsersResponses[keyof GetAccessNamespacesByIdUsersResponses];
 
-export type PostResourceNamespacesByIdUsersData = {
+export type PostAccessNamespacesByIdUsersData = {
     body: AccessGrantRequest;
     path: {
         /**
@@ -1366,10 +1374,10 @@ export type PostResourceNamespacesByIdUsersData = {
         id: string;
     };
     query?: never;
-    url: '/resource/namespaces/{id}/users';
+    url: '/access/namespaces/{id}/users';
 };
 
-export type PostResourceNamespacesByIdUsersErrors = {
+export type PostAccessNamespacesByIdUsersErrors = {
     /**
      * Invalid request body, invalid resource_type, or validation failure
      */
@@ -1396,16 +1404,16 @@ export type PostResourceNamespacesByIdUsersErrors = {
     500: ErrorResponse;
 };
 
-export type PostResourceNamespacesByIdUsersError = PostResourceNamespacesByIdUsersErrors[keyof PostResourceNamespacesByIdUsersErrors];
+export type PostAccessNamespacesByIdUsersError = PostAccessNamespacesByIdUsersErrors[keyof PostAccessNamespacesByIdUsersErrors];
 
-export type PostResourceNamespacesByIdUsersResponses = {
+export type PostAccessNamespacesByIdUsersResponses = {
     /**
      * Access granted successfully
      */
     200: unknown;
 };
 
-export type DeleteResourceNamespacesByIdUsersByUserIdData = {
+export type DeleteAccessNamespacesByIdUsersByUserIdData = {
     body?: never;
     path: {
         /**
@@ -1418,10 +1426,10 @@ export type DeleteResourceNamespacesByIdUsersByUserIdData = {
         userID: string;
     };
     query?: never;
-    url: '/resource/namespaces/{id}/users/{userID}';
+    url: '/access/namespaces/{id}/users/{userID}';
 };
 
-export type DeleteResourceNamespacesByIdUsersByUserIdErrors = {
+export type DeleteAccessNamespacesByIdUsersByUserIdErrors = {
     /**
      * Invalid body or invalid resource_type
      */
@@ -1440,9 +1448,9 @@ export type DeleteResourceNamespacesByIdUsersByUserIdErrors = {
     500: ErrorResponse;
 };
 
-export type DeleteResourceNamespacesByIdUsersByUserIdError = DeleteResourceNamespacesByIdUsersByUserIdErrors[keyof DeleteResourceNamespacesByIdUsersByUserIdErrors];
+export type DeleteAccessNamespacesByIdUsersByUserIdError = DeleteAccessNamespacesByIdUsersByUserIdErrors[keyof DeleteAccessNamespacesByIdUsersByUserIdErrors];
 
-export type DeleteResourceNamespacesByIdUsersByUserIdResponses = {
+export type DeleteAccessNamespacesByIdUsersByUserIdResponses = {
     /**
      * Access revoked successfully
      */
