@@ -55,6 +55,10 @@ paths:
       responses:
         '200':
           description: OK. Returns `auth_token` cookie.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileInfo'
           headers:
             Set-Cookie:
               schema:
@@ -567,7 +571,7 @@ paths:
         '500': { $ref: '#/components/responses/InternalError' }
 
   # --- NAMESPACES ---
-  /resource/namespaces:
+  /access/namespaces:
     get:
       tags: [Namespaces]
       summary: List and filter namespaces
@@ -632,7 +636,7 @@ paths:
         '409': { $ref: '#/components/responses/Conflict' }
         '500': { $ref: '#/components/responses/InternalError' }
 
-  /resource/namespaces/{id}:
+  /access/namespaces/{id}:
     head:
       tags: [Namespaces]
       summary: Check if namespace exists
@@ -692,7 +696,7 @@ paths:
       responses:
         '200': { description: Namespace deleted successfully }
 
-  /resource/namespaces/{id}/visibility:
+  /access/namespaces/{id}/visibility:
     patch:
       tags: [Namespaces]
       summary: Change namespace visibility
@@ -748,7 +752,7 @@ paths:
 
         '500': { $ref: '#/components/responses/InternalError' }
 
-  /resource/namespaces/{id}/state:
+  /access/namespaces/{id}/state:
     patch:
       tags: [Namespaces]
       summary: Change namespace state
@@ -811,7 +815,7 @@ paths:
 
         '500': { $ref: '#/components/responses/InternalError' }
 
-  /resource/namespaces/{id}/users:
+  /access/namespaces/{id}/users:
     get:
       tags: [Namespaces]
       summary: List users with access to namespace
@@ -925,7 +929,7 @@ paths:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
         '500': { $ref: '#/components/responses/InternalError' }
 
-  /resource/namespaces/{id}/users/{userID}:
+  /access/namespaces/{id}/users/{userID}:
     delete:
       tags: [Namespaces, Access]
       summary: Revoke user access from namespace
@@ -1038,12 +1042,12 @@ components:
 
     ErrorResponse:
       type: object
-      required: [code, message]
+      required: [error_code, error_message]
       properties:
-        code:
+        error_code:
           type: integer
           description: HTTP status code
-        message:
+        error_message:
           type: string
           description: Error message
 
@@ -1565,3 +1569,17 @@ components:
           type: string
           enum: [Guest, Developer, Maintainer]
         granted_by: { type: string }
+    # ---- AUTHENTICATION SCHEMAS ----
+    UserProfileInfo:
+      type: object
+      required:
+        - user_id
+        - username
+        - role
+      properties:
+        user_id:
+          type: string
+        username:
+          type: string
+        role:
+          type: string
