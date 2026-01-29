@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "generate:api": "openapi-ts -i ./api-spec-v1.yaml -o ./src/api -c @hey-api/client-fetch"
+    "generate:api": "openapi-ts -i ../docs/oir-management-api-spec-v1.yaml -o ./src/api -c @hey-api/client-fetch"
   },
   "author": "Sankeerthan Kasilingam",
   "license": "ISC",
