@@ -58,7 +58,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserProfileInfo' 
+                $ref: '#/components/schemas/UserProfileInfo'
           headers:
             Set-Cookie:
               schema:
@@ -1128,10 +1128,10 @@ components:
       type: object
       required: [error_code, error_message]
       properties:
-        error_code: 
+        error_code:
           type: integer
           description: HTTP status code
-        error_message: 
+        error_message:
           type: string
           description: Error message
 
