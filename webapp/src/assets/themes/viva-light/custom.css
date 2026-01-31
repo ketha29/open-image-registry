@@ -175,3 +175,79 @@ input {
 .legend-delete {
   background-color: #ef4444;
 }
+
+.bg-offwhite {
+  background-color: #F8FAFC;
+}
+
+.title-400 {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 400;
+}
+
+.title-500 {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+}
+
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Added to style popup dialog */
+@keyframes dialogSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.p-dialog .p-dialog-content {
+  padding: 0 !important;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 0px;
+  /* No horizontal scrollbar */
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--surface-300);
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--surface-400);
+}
