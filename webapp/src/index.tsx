@@ -15,6 +15,7 @@ import '@fontsource/montserrat/500.css';
 import '@fontsource/montserrat/700.css';
 import '@fontsource/inter';
 import { client } from './api/client.gen';
+import { LoaderProvider } from './components/loader';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
@@ -22,16 +23,38 @@ client.setConfig({
   baseUrl: window.APP_CONFIG?.API_BASE_URL || 'http://localhost:8000/api/v1',
 });
 
+client.interceptors.response.use(async (response) => {
+  if (response.status === 401) {
+    setTimeout(() => {
+      window.location.href = '/login';
+    }, 100);
+  }
+
+  return response;
+});
+
+client.interceptors.response.use(async (response) => {
+  if (response.status === 401) {
+    setTimeout(() => {
+      window.location.href = '/login';
+    }, 100);
+  }
+
+  return response;
+});
+
 root.render(
   <React.StrictMode>
     <ToastProvider>
-      <PrimeReactProvider
-        value={{
-          hideOverlaysOnDocumentScrolling: true,
-        }}
-      >
-        <RouterProvider router={AppRouter} />
-      </PrimeReactProvider>
+      <LoaderProvider>
+        <PrimeReactProvider
+          value={{
+            hideOverlaysOnDocumentScrolling: true,
+          }}
+        >
+          <RouterProvider router={AppRouter} />
+        </PrimeReactProvider>
+      </LoaderProvider>
     </ToastProvider>
   </React.StrictMode>
 );
