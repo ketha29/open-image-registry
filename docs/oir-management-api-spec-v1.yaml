@@ -625,6 +625,9 @@ paths:
         - name: purpose
           in: query
           schema: { type: string, enum: [Team, Project] }
+        - name: is_public
+          in: query
+          schema: { type: boolean }
       responses:
         '200':
           description: List of namespaces retrieved successfully
